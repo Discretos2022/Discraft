@@ -10,6 +10,7 @@ using System.Threading;
 
 /**
  * 
+ *  Copyright (c) SIEDEL 2024
  *
  *  💿
  * 
