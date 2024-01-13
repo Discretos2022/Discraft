@@ -242,7 +242,7 @@ namespace DiscCraft
 
             //Handler.Draw(cameraV2, GraphicsDevice, basicEffect);
 
-            bool lightEnable = false;
+            bool lightEnable = true;
             if (lightEnable) {
                 basicEffect.EnableDefaultLighting();   // make sure lighting is on
                 basicEffect.LightingEnabled = true;
