@@ -21,7 +21,7 @@ namespace DiscCraft
 {
     public class Main : Game
     {
-
+        public static long vertexNum = 0;
 
         private GraphicsDeviceManager graphics;
         private SpriteBatch spriteBatch;
@@ -35,7 +35,7 @@ namespace DiscCraft
         //BasicEffect for rendering
         BasicEffect basicEffect;
 
-        public Camera cameraV2;
+        public static Camera cameraV2;
 
         public static bool cameraActived = true;
 
@@ -48,6 +48,7 @@ namespace DiscCraft
         public static Texture2D BlockSheet;
 
         public static Texture2D Bounds;
+        public static Texture2D Circle;
 
         public static Vector2 cp;
         public static Vector2 cn;
@@ -154,6 +155,7 @@ namespace DiscCraft
             Cursor = Content.Load<Texture2D>("Images\\Cursor");
 
             Bounds = Content.Load<Texture2D>("Images\\Bounds");
+            Circle = Content.Load<Texture2D>("Images\\Circle");
 
             SuperFont = Content.Load<Texture2D>("Images\\SuperFont");
             InitFont();
@@ -168,7 +170,9 @@ namespace DiscCraft
             KeyInput.Update();
             MouseInput.Update();
 
+            //Console.WriteLine("Vertex : " + vertexNum);
 
+            //Console.WriteLine("CAMERA ROT : " + cameraV2.Rotation);
 
             if(KeyInput.getKeyState().IsKeyDown(Keys.P) && !KeyInput.getOldKeyState().IsKeyDown(Keys.P))
             {
@@ -267,7 +271,8 @@ namespace DiscCraft
 
             basicEffect.VertexColorEnabled = false;
 
-            Console.WriteLine(Handler.chunks[0, 0].vertexCount);
+            //if(Handler.chunks.ContainsKey(new Vector2(0, 0)))
+                //Console.WriteLine(Handler.chunks[new Vector2(0, 0)].vertexCount);
 
             //if(Vector2.Distance(chunk.Position, new Vector2(cameraV2.Position.X, cameraV2.Position.Y)) < 100)
             //chunk.Draw(GraphicsDevice, basicEffect);
@@ -286,7 +291,9 @@ namespace DiscCraft
             Handler.Draw(GraphicsDevice, basicEffect, cameraV2);
 
 
+            Block b = new Block(new Vector3(0, 0, 0), 4) + new Block(Vector3.One, 8);
 
+            Console.WriteLine(b.ToString());
 
 
             spriteBatch.Begin(samplerState: SamplerState.PointClamp);
@@ -300,6 +307,9 @@ namespace DiscCraft
             spriteBatch.DrawString(UltimateFont, "rotation z : " + cameraV2.cameraLookAt.Z, new Vector2(10, 140), Color.White);
 
             spriteBatch.DrawString(UltimateFont, "view origine : " + cameraV2.Position, new Vector2(10, 190), Color.White);
+
+
+            MiniMap.Draw(spriteBatch);
 
 
             Process process = Process.GetCurrentProcess();
@@ -318,7 +328,7 @@ namespace DiscCraft
 
             stop.Stop();
 
-            Console.WriteLine("Time : " + stop.ElapsedMilliseconds);
+            //Console.WriteLine("Time : " + stop.ElapsedMilliseconds);
 
             stop.Reset();
 

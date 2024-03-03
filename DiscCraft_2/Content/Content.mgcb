@@ -49,6 +49,18 @@
 /processorParam:TextureFormat=Color
 /build:Images/Bounds.png
 
+#begin Images/circle.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:Images/circle.png
+
 #begin Images/Cursor.png
 /importer:TextureImporter
 /processor:TextureProcessor

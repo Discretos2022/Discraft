@@ -1,7 +1,9 @@
 ﻿using DiscCraft;
+using DiscCraft_2;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
+using System.Runtime.Serialization;
 
 namespace DiscCraft
 {
@@ -41,6 +43,8 @@ namespace DiscCraft
         public ushort vbytes = sizeof(float) * 8;
         public ushort ibytes = sizeof(ushort) * 8;
 
+        public bool isDrawed = true;
+
 
         public Chunk(Vector2 _position, GraphicsDevice _gpu)
         {
@@ -48,7 +52,7 @@ namespace DiscCraft
 
             Position = _position;
 
-            blocks = new Block[16, 64, 16];
+            blocks = new Block[16, 64, 16]; //new Block[16, 64, 16];
 
             //Pos = Position;
 
@@ -75,11 +79,18 @@ namespace DiscCraft
                 {
                     for (int z = 0; z < blocks.GetLength(2); z++)
                     {
-                        blocks[x, y, z] = new Block(new Vector3(x, y, z), 1);
+                        if(Random.Shared.Next(0, 2) == 1)
+                            blocks[x, y, z] = new Block(new Vector3(x, y, z), 1);
                     }
                 }
             }
 
+            //Console.WriteLine(vertexCount);
+
+        }
+
+        public void InitVertexBuffer()
+        {
 
             for (int x = 0; x < blocks.GetLength(0); x++)
             {
@@ -88,7 +99,8 @@ namespace DiscCraft
                     for (int z = 0; z < blocks.GetLength(2); z++)
                     {
                         /// TODO : Block Adder
-                        AddBlock(new Vector3(x + Position.X, -y, z + Position.Y), new Vector3(x, y, z), 2);
+                        if (blocks[x, y, z] != null)
+                            AddBlock(new Vector3(x + Position.X, -y, z + Position.Y), new Vector3(x, y, z), 2);
                     }
                 }
             }
@@ -100,16 +112,14 @@ namespace DiscCraft
                     for (int z = 0; z < blocks.GetLength(2); z++)
                     {
                         /// TODO : Block Adder
-                        AddBlock(new Vector3(x + Position.X, -y, z + Position.Y), new Vector3(x, y, z), 1);
+                        if (blocks[x, y, z] != null)
+                            AddBlock(new Vector3(x + Position.X, -y, z + Position.Y), new Vector3(x, y, z), 1);
                     }
                 }
             }
 
             vertexBuffer.SetData<VertexPositionNormalTexture>(vertex);
             indexBuffer.SetData<ushort>(indices);
-
-            //Console.WriteLine(vertexCount);
-
         }
 
         public void Draw(GraphicsDevice gpu, BasicEffect basicEffect)
@@ -235,6 +245,7 @@ namespace DiscCraft
             if ((vbuf_start + vertexCount) >= 65535) { Console.WriteLine("MAX VERTEX !"); return; }
             vertex[vertexCount] = new VertexPositionNormalTexture(new Vector3(x, y, z), norm, new Vector2(u, v));
             vertexCount += 1;
+            Main.vertexNum += 1;
 
         }
 
@@ -338,6 +349,53 @@ namespace DiscCraft
                 if (blocks[x, y + 1, z] == null) down = false;
                 else down = true;
             }
+
+
+
+
+            /// Between chunk !
+            if (x == 0)
+            {
+                if (Handler.GetChunk(Position / 16 - new Vector2(1, 0)) != null)
+                {
+                    if (Handler.GetChunk(Position / 16 - new Vector2(1, 0)).blocks[16 - 1, y, z] == null) right = false;
+                    else right = true;
+                }
+                //else right = true;
+            }
+
+            if (x == 16 - 1)
+            {
+                if (Handler.GetChunk(Position / 16 + new Vector2(1, 0)) != null)
+                {
+                    if (Handler.GetChunk(Position / 16 + new Vector2(1, 0)).blocks[0, y, z] == null) left = false;
+                    else left = true;
+                }
+                //else left = true;
+            }
+
+
+
+            if (z == 0)
+            {
+                if (Handler.GetChunk(Position / 16 - new Vector2(0, 1)) != null)
+                {
+                    if (Handler.GetChunk(Position / 16 - new Vector2(0, 1)).blocks[x, y, 16 - 1] == null) front = false;
+                    else front = true;
+                }
+                //else front = true;
+            }
+
+            if (z == 16 - 1)
+            {
+                if (Handler.GetChunk(Position / 16 + new Vector2(0, 1)) != null)
+                {
+                    if (Handler.GetChunk(Position / 16 + new Vector2(0, 1)).blocks[x, y, 0] == null) back = false;
+                    else back = true;
+                }
+                //else back = true;
+            }
+
 
 
         }

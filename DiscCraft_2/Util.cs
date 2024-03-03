@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Xna.Framework;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -170,6 +171,11 @@ namespace DiscCraft
 
 
             return (int)val;
+        }
+
+        public static float GetAngleBetweenVector(Vector2 vec1, Vector2 vec2)
+        {
+            return (float)Math.Acos((vec1.X * vec2.X + vec1.Y * vec2.Y) / (Math.Sqrt(vec1.X * vec1.X + vec1.Y * vec1.Y) * Math.Sqrt(vec2.X * vec2.X + vec2.Y * vec2.Y)));
         }
 
     }
