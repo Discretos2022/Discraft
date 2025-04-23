@@ -22,7 +22,7 @@ namespace DiscCraft_2
             for (int i = 0; i < Handler.chunks.Count; i++)
             {
 
-                KeyValuePair<Vector2, Chunk> chunk = Handler.chunks.ElementAt(i);
+                KeyValuePair<Vect2, Chunk> chunk = Handler.chunks.ElementAt(i);
                 color = new Color(Random.Shared.Next(0, 255), Random.Shared.Next(0, 255), Random.Shared.Next(0, 255));
 
                 if (Handler.chunks[chunk.Key].isDrawed)
@@ -37,7 +37,8 @@ namespace DiscCraft_2
 
 
             //Vector2 point = (new Vector2(Main.cameraV2.cameraLookAt.X, Main.cameraV2.cameraLookAt.Z) - new Vector2(Main.cameraV2.Position.X, Main.cameraV2.Position.Z)) * 100 + new Vector2(Main.cameraV2.Position.X, Main.cameraV2.Position.Z);
-            Vector2 point = (new Vector2(Main.cameraV2.cameraLookAt.X, Main.cameraV2.cameraLookAt.Z) - new Vector2(Main.cameraV2.Position.X, Main.cameraV2.Position.Z)) * 120 + new Vector2(Main.cameraV2.Position.X, Main.cameraV2.Position.Z);
+            
+            ///Vector2 point = (new Vector2(Main.cameraV2.cameraLookAt.X, Main.cameraV2.cameraLookAt.Z) - new Vector2(Main.cameraV2.Position.X, Main.cameraV2.Position.Z)) * 120 + new Vector2(Main.cameraV2.Position.X, Main.cameraV2.Position.Z);
 
 
             //Render.DrawLineV1_1(Main.Bounds, new Vector2(Main.cameraV2.Position.X + 400, Main.cameraV2.Position.Z + 16), point, spriteBatch, Color.Red, 4, Render.LineType.Center);
@@ -45,7 +46,7 @@ namespace DiscCraft_2
 
             spriteBatch.Draw(Main.Bounds, new Rectangle((int)Main.cameraV2.Position.X + 400 - 4, (int)Main.cameraV2.Position.Z + 4, 8, 8), Color.Yellow);
 
-            spriteBatch.Draw(Main.Circle, point + new Vector2(400, 16), null, Color.Red, 0f, new Vector2(32, 32), 4f, SpriteEffects.None, 0f);
+            ///spriteBatch.Draw(Main.Circle, point + new Vector2(400, 16), null, Color.Red, 0f, new Vector2(32, 32), 4f, SpriteEffects.None, 0f);
 
         }
 

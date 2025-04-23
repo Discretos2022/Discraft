@@ -9,7 +9,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Test", "Test\Test.csproj", 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CubeComp", "CubeComp\CubeComp.csproj", "{E6A4FF3C-BE83-440B-82A6-465FE6D90F27}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DiscCraft_2", "DiscCraft_2\DiscCraft_2.csproj", "{47007239-B603-45E6-B50A-68AB47F6F9B6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DiscCraft_2", "DiscCraft_2\DiscCraft_2.csproj", "{47007239-B603-45E6-B50A-68AB47F6F9B6}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Discraft", "Discraft\Discraft.csproj", "{A1A54D31-7A14-4409-A571-D8D704B69D46}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,6 +35,10 @@ Global
 		{47007239-B603-45E6-B50A-68AB47F6F9B6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{47007239-B603-45E6-B50A-68AB47F6F9B6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{47007239-B603-45E6-B50A-68AB47F6F9B6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A1A54D31-7A14-4409-A571-D8D704B69D46}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A1A54D31-7A14-4409-A571-D8D704B69D46}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A1A54D31-7A14-4409-A571-D8D704B69D46}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A1A54D31-7A14-4409-A571-D8D704B69D46}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

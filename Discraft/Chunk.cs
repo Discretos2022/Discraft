@@ -63,7 +63,11 @@ namespace DiscCraft
         public ushort vbytes = sizeof(float) * 8;
         public ushort ibytes = sizeof(ushort) * 8;
 
-        public bool isDrawed = true;
+        public bool isDrawed = false;
+
+
+        public int VERTEX = 0;
+        public int TRIANGLES = 0;
 
 
         public Chunk(Vect2 _position, GraphicsDevice _gpu)
@@ -206,6 +210,9 @@ namespace DiscCraft
             indexBuffer2.SetData<ushort>(indices2);
             vertexBuffer3.SetData<VertexPositionNormalTexture>(vertex3);
             indexBuffer3.SetData<ushort>(indices3);
+
+            isDrawed = true;
+
         }
 
         public void Draw(GraphicsDevice gpu, BasicEffect basicEffect)
@@ -335,6 +342,14 @@ namespace DiscCraft
 
             GetAdjacentBlock(PosInChunk, ref front, ref back, ref left, ref right, ref up, ref down);
 
+
+            if (Pos.Y < Main.cameraV2.Position.Y) down = true;
+            if (Pos.X < Main.cameraV2.Position.X) right = true;
+            if (Pos.X > Main.cameraV2.Position.X) left = true;
+            if (Pos.Z < Main.cameraV2.Position.Z) front = true;
+            if (Pos.Z > Main.cameraV2.Position.Z) back = true;
+
+
             Vector3 norm = Vector3.Up;
 
             /// Down
@@ -411,6 +426,7 @@ namespace DiscCraft
             else if (VertexIndex == 3) vertex3[vertexCount] = new VertexPositionNormalTexture(new Vector3(x, y, z), norm, new Vector2(u, v));
             vertexCount += 1;
             Main.vertexNum += 1;
+            VERTEX += 1;
 
         }
 
@@ -445,6 +461,7 @@ namespace DiscCraft
                 indices3[indexCount] = c; indexCount++;
             }
 
+            TRIANGLES += 1;
 
         }
 

@@ -82,6 +82,15 @@ namespace DiscCraft
         public int tick = 0;
 
 
+
+        public static int VERTEX = 0;
+        public static int TRIANGLES = 0;
+
+
+        public Stopwatch FpsTime;
+        public float fpsTime;
+
+
         public Main()
         {
             graphics = new GraphicsDeviceManager(this);
@@ -102,7 +111,7 @@ namespace DiscCraft
 
 
             graphics.IsFullScreen = false;
-            graphics.HardwareModeSwitch = false;
+            graphics.HardwareModeSwitch = true;
 
         }
 
@@ -125,6 +134,7 @@ namespace DiscCraft
             projectionMatrix = cameraV2.Projection;
             viewMatrix = cameraV2.View;
 
+            FpsTime = new Stopwatch();
 
             base.Initialize();
         }
@@ -158,7 +168,7 @@ namespace DiscCraft
             //SerializeNow(Handler.GetChunk(new Vect2(0, 0)));
 
             //ChunkLoader.SaveChunkAsync(new Vect2(0, 0));
-            ChunkLoader.SaveChunk2(new Vect2(0, 0));
+            //ChunkLoader.SaveChunk2(new Vect2(0, 0));
 
 
             Cursor = Content.Load<Texture2D>("Images\\Cursor");
@@ -256,6 +266,10 @@ namespace DiscCraft
         {
             //GraphicsDevice.Clear(new Color(0, 0, 0.2f));
 
+            FpsTime.Stop();
+            fpsTime = ((float)FpsTime.Elapsed.TotalMilliseconds);
+            FpsTime.Restart();
+
             stop.Start();
 
             GraphicsDevice.Clear(Color.CornflowerBlue);
@@ -285,7 +299,7 @@ namespace DiscCraft
 
             //Handler.Draw(cameraV2, GraphicsDevice, basicEffect);
 
-            bool lightEnable = false;
+            bool lightEnable = true;
             if (lightEnable) {
                 basicEffect.EnableDefaultLighting();   // make sure lighting is on
                 basicEffect.LightingEnabled = true;
@@ -357,6 +371,14 @@ namespace DiscCraft
             //Console.WriteLine(process.PagedMemorySize64);
 
             spriteBatch.DrawString(UltimateFont, "memory : " + (((int)process.WorkingSet64 / 8) / 1024 / 1024), new Vector2(10, 260), Color.White);
+            
+            
+            spriteBatch.DrawString(UltimateFont, "vertex : " + VERTEX, new Vector2(10, 300), Color.White);
+            spriteBatch.DrawString(UltimateFont, "triangle : " + TRIANGLES, new Vector2(10, 320), Color.White);
+
+            spriteBatch.DrawString(UltimateFont, "fps : " + Math.Round(1.0f / (fpsTime / 1000)), new Vector2(10, 400), Color.White);
+
+            
 
 
             spriteBatch.Draw(Cursor, new Vector2(GraphicsDevice.Viewport.Width / 2 - 16 / 2, GraphicsDevice.Viewport.Height / 2 - 16 / 2), Color.White);
