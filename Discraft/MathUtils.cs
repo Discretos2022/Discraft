@@ -10,7 +10,11 @@ namespace DiscCraft_2
     public class MathUtils
     {
 
-
+        public static int RoundLower(float num)
+        {
+            if (num >= 0) return (int)num;
+            else return (int)num - 1;
+        }
 
     }
 
@@ -60,6 +64,16 @@ namespace DiscCraft_2
         public bool Equals(Vect2 other)
         {
             return X == other.X && Y == other.Y;
+        }
+
+        public static bool operator ==(Vect2 vect1, Vect2 vect2)
+        {
+            return vect1.X == vect2.X && vect1.Y == vect2.Y;
+        }
+
+        public static bool operator !=(Vect2 vect1, Vect2 vect2)
+        {
+            return vect1.X != vect2.X || vect1.Y != vect2.Y;
         }
 
         public static double Distance(Vect2 v1, Vect2 v2)

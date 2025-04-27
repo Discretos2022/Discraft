@@ -22,38 +22,42 @@ namespace DiscCraft_2
             int baseX = 800;
             int baseY = 200;
 
-
-            /*for (int i = 0; i < Handler.chunks.Count; i++)
+            /*lock (Handler.chunks)
             {
-
-                KeyValuePair<Vect2, Chunk> chunk = Handler.chunks.ElementAt(i);
-                color = new Color(Random.Shared.Next(0, 255), Random.Shared.Next(0, 255), Random.Shared.Next(0, 255));
-
-                if (Handler.chunks.ContainsKey(chunk.Key))
+                for (int i = 0; i < Handler.chunks.Count; i++)
                 {
-                    if (Handler.chunks[chunk.Key].isDrawed)
+
+                    KeyValuePair<Vect2, Chunk> chunk = Handler.chunks.ElementAt(i);
+                    color = new Color(Random.Shared.Next(0, 255), Random.Shared.Next(0, 255), Random.Shared.Next(0, 255));
+
+                    if (Handler.chunks.ContainsKey(chunk.Key))
                     {
-                        if (chunk.Key.X % 2 == 0 && chunk.Key.Y % 2 != 0)
-                            spriteBatch.Draw(Main.Bounds, new Rectangle((int)chunk.Key.X * 16 + baseX - (int)Main.cameraV2.Position.X, (int)chunk.Key.Y * 16 + baseY - (int)Main.cameraV2.Position.Z, 16, 16), Color.Green);
-                        else if (chunk.Key.X % 2 != 0 && chunk.Key.Y % 2 == 0)
-                            spriteBatch.Draw(Main.Bounds, new Rectangle((int)chunk.Key.X * 16 + baseX - (int)Main.cameraV2.Position.X, (int)chunk.Key.Y * 16 + baseY - (int)Main.cameraV2.Position.Z, 16, 16), Color.Green);
+                        if (Handler.chunks[chunk.Key].isDrawed)
+                        {
+                            if (chunk.Key.X % 2 == 0 && chunk.Key.Y % 2 != 0)
+                                spriteBatch.Draw(Main.Bounds, new Rectangle((int)chunk.Key.X * 16 + baseX - (int)Main.cameraV2.Position.X, (int)chunk.Key.Y * 16 + baseY - (int)Main.cameraV2.Position.Z, 16, 16), Color.Green);
+                            else if (chunk.Key.X % 2 != 0 && chunk.Key.Y % 2 == 0)
+                                spriteBatch.Draw(Main.Bounds, new Rectangle((int)chunk.Key.X * 16 + baseX - (int)Main.cameraV2.Position.X, (int)chunk.Key.Y * 16 + baseY - (int)Main.cameraV2.Position.Z, 16, 16), Color.Green);
+                            else
+                                spriteBatch.Draw(Main.Bounds, new Rectangle((int)chunk.Key.X * 16 + baseX - (int)Main.cameraV2.Position.X, (int)chunk.Key.Y * 16 + baseY - (int)Main.cameraV2.Position.Z, 16, 16), Color.DarkGreen);
+                        }
                         else
-                            spriteBatch.Draw(Main.Bounds, new Rectangle((int)chunk.Key.X * 16 + baseX - (int)Main.cameraV2.Position.X, (int)chunk.Key.Y * 16 + baseY - (int)Main.cameraV2.Position.Z, 16, 16), Color.DarkGreen);
+                        {
+                            if (chunk.Key.X % 2 == 0 && chunk.Key.Y % 2 != 0)
+                                spriteBatch.Draw(Main.Bounds, new Rectangle((int)chunk.Key.X * 16 + baseX - (int)Main.cameraV2.Position.X, (int)chunk.Key.Y * 16 + baseY - (int)Main.cameraV2.Position.Z, 16, 16), Color.Red);
+                            else if (chunk.Key.X % 2 != 0 && chunk.Key.Y % 2 == 0)
+                                spriteBatch.Draw(Main.Bounds, new Rectangle((int)chunk.Key.X * 16 + baseX - (int)Main.cameraV2.Position.X, (int)chunk.Key.Y * 16 + baseY - (int)Main.cameraV2.Position.Z, 16, 16), Color.Red);
+                            else
+                                spriteBatch.Draw(Main.Bounds, new Rectangle((int)chunk.Key.X * 16 + baseX - (int)Main.cameraV2.Position.X, (int)chunk.Key.Y * 16 + baseY - (int)Main.cameraV2.Position.Z, 16, 16), Color.DarkRed);
+                        }
                     }
-                    else
-                    {
-                        if (chunk.Key.X % 2 == 0 && chunk.Key.Y % 2 != 0)
-                            spriteBatch.Draw(Main.Bounds, new Rectangle((int)chunk.Key.X * 16 + baseX - (int)Main.cameraV2.Position.X, (int)chunk.Key.Y * 16 + baseY - (int)Main.cameraV2.Position.Z, 16, 16), Color.Red);
-                        else if (chunk.Key.X % 2 != 0 && chunk.Key.Y % 2 == 0)
-                            spriteBatch.Draw(Main.Bounds, new Rectangle((int)chunk.Key.X * 16 + baseX - (int)Main.cameraV2.Position.X, (int)chunk.Key.Y * 16 + baseY - (int)Main.cameraV2.Position.Z, 16, 16), Color.Red);
-                        else
-                            spriteBatch.Draw(Main.Bounds, new Rectangle((int)chunk.Key.X * 16 + baseX - (int)Main.cameraV2.Position.X, (int)chunk.Key.Y * 16 + baseY - (int)Main.cameraV2.Position.Z, 16, 16), Color.DarkRed);
-                    }
+
+
+
                 }
-                    
-
-
             }*/
+
+            
 
             //Render.DrawLineV1_1(Main.Bounds, new Vector2(Main.cameraV2.Position.X, Main.cameraV2.Position.Z), new Vector2(Main.cameraV2.cameraLookAt.X, Main.cameraV2.cameraLookAt.Z), spriteBatch, Color.Red, 4, Render.LineType.Center);
 

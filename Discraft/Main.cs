@@ -1,4 +1,5 @@
 ﻿using DiscCraft_2;
+using Discraft;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
@@ -7,6 +8,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Reflection.Metadata.Ecma335;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Threading;
 
@@ -90,6 +92,8 @@ namespace DiscCraft
         public Stopwatch FpsTime;
         public float fpsTime;
 
+        public static Ray playerRay;
+
 
         public Main()
         {
@@ -111,14 +115,14 @@ namespace DiscCraft
 
 
             graphics.IsFullScreen = false;
-            graphics.HardwareModeSwitch = true;
+            graphics.HardwareModeSwitch = false;
 
         }
 
         protected override void Initialize()
         {
 
-            cameraV2 = new Camera(this, new Vector3(0,0,0), new Vector3(0,0,0), 0.2f); // 0.5f
+            cameraV2 = new Camera(this, new Vector3(0,40,0), new Vector3(0,0,0), 0.2f); // 0.5f
 
 
             //Setup Camera
@@ -135,6 +139,8 @@ namespace DiscCraft
             viewMatrix = cameraV2.View;
 
             FpsTime = new Stopwatch();
+
+            RPC.Connect();
 
             base.Initialize();
         }
@@ -256,7 +262,6 @@ namespace DiscCraft
                 Handler.Update(gameTime, GraphicsDevice);
                 tick = 0;
             }
-                
 
 
             base.Update(gameTime);
@@ -344,6 +349,209 @@ namespace DiscCraft
             Handler.Draw(GraphicsDevice, basicEffect, cameraV2);
 
 
+
+
+
+
+
+
+            int range = 10;
+
+            Vector3 cursorOrigine = cameraV2.Position + new Vector3(0, 0, 0); // 1
+            Vector3 cursorEnd = new Vector3(range, 0, 0);
+
+            /// Build a rotation matrix
+            Matrix rotationMatrix = Matrix.CreateRotationX(cameraV2.cameraRotation.X) * Matrix.CreateRotationY(cameraV2.cameraRotation.Y);
+
+            /// Calculate end of vision
+            cursorEnd = Vector3.Transform(new Vector3(0, 0, range), rotationMatrix);
+
+            Vector3 selectPos = new Vector3(0, 255, 0);
+
+
+            /*if (Handler.chunks.ContainsKey(new Vect2(0, 0)))
+            {
+
+                for (int x = 0; x < Handler.chunks[new Vect2(0, 0)].blocks.GetLength(0); x++)
+                    for (int y = 0; y < Handler.chunks[new Vect2(0, 0)].blocks.GetLength(1); y++)
+                        for (int z = 0; z < Handler.chunks[new Vect2(0, 0)].blocks.GetLength(2); z++)
+                        {
+                            if(Handler.chunks[new Vect2(0, 0)].blocks[x, y, z] != null)
+                            {
+                                CollisionHelper.BlockFace res = CollisionHelper.RayBox(cursorOrigine, cursorOrigine + cursorEnd, new Vector3(x, y, z));
+
+                                if (res != CollisionHelper.BlockFace.None)
+                                {
+                                    if (selectPos.Y == 255 || Vector3.Distance(selectPos + new Vector3(0.5f, 0.5f, 0.5f), cursorOrigine) > Vector3.Distance(new Vector3(x, y, z) + new Vector3(0.5f, 0.5f, 0.5f), cursorOrigine))
+                                    {
+                                        selectPos = new Vector3(x, y, z);
+                                        //Console.WriteLine($"Collision {x};{y};{z} -> {res}");
+                                    }
+                                    
+                                }
+                            }
+                            
+
+                        }
+
+            }*/
+
+
+
+            for (int x = (int)cursorOrigine.X - range; x < (int)cursorOrigine.X + range; x++)
+            {
+                for (int y = (int)cursorOrigine.Y - range; y < (int)cursorOrigine.Y + range; y++)
+                {
+                    for (int z = (int)cursorOrigine.Z - range; z < (int)cursorOrigine.Z + range; z++)
+                    {
+                        Vector3 v = new Vector3(x, y, z);
+
+                        Chunk c = Handler.GetChunkWithBlockCoord(v);
+
+                        if (c != null)
+                        {
+
+                            Vector3 bCoord = Handler.GetBlockCoordInChunk(v);
+
+                            if (c.blocks[(int)bCoord.X, (int)bCoord.Y, (int)bCoord.Z] != null)
+                            {
+                                CollisionHelper.BlockFace res = CollisionHelper.RayBox(cursorOrigine, cursorOrigine + cursorEnd, v);
+
+                                if (res != CollisionHelper.BlockFace.None)
+                                {
+                                    if (selectPos.Y == 255 || Vector3.Distance(selectPos + new Vector3(0.5f, 0.5f, 0.5f), cursorOrigine) > Vector3.Distance(v + new Vector3(0.5f, 0.5f, 0.5f), cursorOrigine))
+                                    {
+                                        selectPos = v;
+                                        //Console.WriteLine($"Collision {x};{y};{z} -> {res}");
+                                    }
+
+                                }
+                            }
+
+                        }
+
+                    }
+                }
+            }
+
+
+
+
+
+            if (MouseInput.getMouseState().LeftButton == ButtonState.Pressed) // && MouseInput.getOldMouseState().LeftButton != ButtonState.Pressed)
+            {
+                if(selectPos.Y != 255)
+                {
+
+                    /*Handler.chunks[new Vect2(0, 0)].blocks[(int)selectPos.X, (int)selectPos.Y, (int)selectPos.Z] = null;
+
+                    if(!Handler.chunkStack.Contains(new Vect2(0, 0)))
+                        Handler.chunkStack.Add(new Vect2(0, 0));*/
+
+                    Chunk c = Handler.GetChunkWithBlockCoord(selectPos);
+
+                    if (c != null)
+                    {
+
+                        Vector3 bCoord = Handler.GetBlockCoordInChunk(selectPos);
+
+                        c.blocks[(int)bCoord.X, (int)bCoord.Y, (int)bCoord.Z] = null;
+                        
+                        if (!Handler.chunkStack.Contains(c.Position/16))
+                            Handler.chunkStack.Add(c.Position/16);
+
+                    }
+
+                }
+            }
+
+
+
+            VertexPositionColor[] vertices = new VertexPositionColor[9];
+
+            vertices[0] = new VertexPositionColor(selectPos + new Vector3(0, 0, 0), Color.Red);
+            vertices[1] = new VertexPositionColor(selectPos + new Vector3(1, 0, 0), Color.Aqua);
+            vertices[2] = new VertexPositionColor(selectPos + new Vector3(0, 1, 0), Color.Yellow);
+            vertices[3] = new VertexPositionColor(selectPos + new Vector3(1, 1, 0), Color.Chartreuse);
+            vertices[4] = new VertexPositionColor(selectPos + new Vector3(0, 0, 1), Color.DarkSlateGray);
+            vertices[5] = new VertexPositionColor(selectPos + new Vector3(1, 0, 1), Color.GhostWhite);
+            vertices[6] = new VertexPositionColor(selectPos + new Vector3(0, 1, 1), Color.LightGreen);
+            vertices[7] = new VertexPositionColor(selectPos + new Vector3(1, 1, 1), Color.RoyalBlue);
+
+            VertexBuffer vertexBuffer;
+            IndexBuffer indexBuffer;
+
+            vertexBuffer = new VertexBuffer(GraphicsDevice, typeof(VertexPositionColor), 12, BufferUsage.WriteOnly);
+            vertexBuffer.SetData<VertexPositionColor>(vertices);
+            short[] indices = new short[36];
+
+            indices[0] = 0;
+            indices[1] = 1;
+            indices[2] = 3;
+
+            indices[3] = 0;
+            indices[4] = 3;
+            indices[5] = 2;
+
+            indices[6] = 1;
+            indices[7] = 5;
+            indices[8] = 3;
+
+            indices[9] = 5;
+            indices[10] = 7;
+            indices[11] = 3;
+
+            indices[12] = 5;
+            indices[13] = 4;
+            indices[14] = 7;
+
+            indices[15] = 4;
+            indices[16] = 6;
+            indices[17] = 7;
+
+            indices[18] = 4;
+            indices[19] = 0;
+            indices[20] = 6;
+
+            indices[21] = 0;
+            indices[22] = 2;
+            indices[23] = 6;
+
+            indices[24] = 2;
+            indices[25] = 3;
+            indices[26] = 6;
+
+            indices[27] = 3;
+            indices[28] = 7;
+            indices[29] = 6;
+
+            indices[30] = 0;
+            indices[31] = 1;
+            indices[32] = 4;
+
+            indices[33] = 1;
+            indices[34] = 5;
+            indices[35] = 4;
+
+            indexBuffer = new IndexBuffer(graphics.GraphicsDevice, typeof(short), indices.Length, BufferUsage.WriteOnly);
+            indexBuffer.SetData(indices);
+
+            GraphicsDevice.SetVertexBuffer(vertexBuffer);
+            GraphicsDevice.Indices = indexBuffer;
+            basicEffect.TextureEnabled = false;  // make sure this is enabled
+
+            foreach (EffectPass pass in basicEffect.CurrentTechnique.Passes)
+            {
+                pass.Apply();
+                GraphicsDevice.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, 12);
+            }
+
+
+
+
+
+
+
             //Block b = new Block(new Vector3(0, 0, 0), 4) + new Block(Vector3.One, 8);
 
             //Console.WriteLine(b.ToString());
@@ -378,7 +586,11 @@ namespace DiscCraft
 
             spriteBatch.DrawString(UltimateFont, "fps : " + Math.Round(1.0f / (fpsTime / 1000)), new Vector2(10, 400), Color.White);
 
-            
+
+            spriteBatch.DrawString(UltimateFont, "ready to update : " + Handler.chunkStack.Count, new Vector2(10, 500), Color.White);
+            spriteBatch.DrawString(UltimateFont, "loaded chunks   : " + Handler.chunks.Count, new Vector2(10, 520), Color.White);
+
+
 
 
             spriteBatch.Draw(Cursor, new Vector2(GraphicsDevice.Viewport.Width / 2 - 16 / 2, GraphicsDevice.Viewport.Height / 2 - 16 / 2), Color.White);
@@ -880,7 +1092,7 @@ namespace DiscCraft
             // create 2 positions in screenspace using the cursor position. 0 is as
             // close as possible to the camera, 1 is as far away as possible.
             Vector3 nearSource = new Vector3(MouseInput.GetPos(), 0f);
-            Vector3 farSource = new Vector3(MouseInput.GetPos(), 1f);
+            Vector3 farSource = new Vector3(MouseInput.GetPos(), 4f);
 
             // use Viewport.Unproject to tell what those two screen space positions
             // would be in world space. we'll need the projection matrix and view

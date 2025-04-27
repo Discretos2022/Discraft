@@ -3,6 +3,7 @@ using DiscCraft_2;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
+using System.Linq;
 using System.Runtime.Serialization;
 
 namespace DiscCraft
@@ -17,6 +18,8 @@ namespace DiscCraft
     
     public class Chunk
     {
+
+        public static int BUFFERSIZE = 5000;//1024 * 16;
 
         public Vect2 Position;
         //public Vector2 Pos;
@@ -39,17 +42,17 @@ namespace DiscCraft
 
         public GraphicsDevice gpu;
 
-        public VertexPositionNormalTexture[] vertex = new VertexPositionNormalTexture[65535];
-        public ushort[] indices = new ushort[65535];
+        public VertexPositionNormalTexture[] vertex = new VertexPositionNormalTexture[BUFFERSIZE];
+        public ushort[] indices = new ushort[BUFFERSIZE];
 
-        public VertexPositionNormalTexture[] vertex1 = new VertexPositionNormalTexture[65535];
-        public ushort[] indices1 = new ushort[65535];
+        public VertexPositionNormalTexture[] vertex1 = new VertexPositionNormalTexture[BUFFERSIZE];
+        public ushort[] indices1 = new ushort[BUFFERSIZE];
 
-        public VertexPositionNormalTexture[] vertex2 = new VertexPositionNormalTexture[65535];
-        public ushort[] indices2 = new ushort[65535];
+        public VertexPositionNormalTexture[] vertex2 = new VertexPositionNormalTexture[BUFFERSIZE];
+        public ushort[] indices2 = new ushort[BUFFERSIZE];
 
-        public VertexPositionNormalTexture[] vertex3 = new VertexPositionNormalTexture[65535];
-        public ushort[] indices3 = new ushort[65535];
+        public VertexPositionNormalTexture[] vertex3 = new VertexPositionNormalTexture[BUFFERSIZE];
+        public ushort[] indices3 = new ushort[BUFFERSIZE];
 
         public byte VertexIndex = 0;
 
@@ -82,19 +85,25 @@ namespace DiscCraft
 
             Position = Position * 16;
 
-            vertexBuffer = new VertexBuffer(gpu, typeof(VertexPositionNormalTexture), 65535, BufferUsage.WriteOnly);
-            indexBuffer = new IndexBuffer(gpu, typeof(ushort), 65535, BufferUsage.WriteOnly);
+            vertexBuffer = new VertexBuffer(gpu, typeof(VertexPositionNormalTexture), BUFFERSIZE, BufferUsage.WriteOnly);
+            indexBuffer = new IndexBuffer(gpu, typeof(ushort), BUFFERSIZE, BufferUsage.WriteOnly);
 
-            vertexBuffer1 = new VertexBuffer(gpu, typeof(VertexPositionNormalTexture), 65535, BufferUsage.WriteOnly);
-            indexBuffer1 = new IndexBuffer(gpu, typeof(ushort), 65535, BufferUsage.WriteOnly);
-            vertexBuffer2 = new VertexBuffer(gpu, typeof(VertexPositionNormalTexture), 65535, BufferUsage.WriteOnly);
-            indexBuffer2 = new IndexBuffer(gpu, typeof(ushort), 65535, BufferUsage.WriteOnly);
-            vertexBuffer3 = new VertexBuffer(gpu, typeof(VertexPositionNormalTexture), 65535, BufferUsage.WriteOnly);
-            indexBuffer3 = new IndexBuffer(gpu, typeof(ushort), 65535, BufferUsage.WriteOnly);
+            vertexBuffer1 = new VertexBuffer(gpu, typeof(VertexPositionNormalTexture), BUFFERSIZE, BufferUsage.WriteOnly);
+            indexBuffer1 = new IndexBuffer(gpu, typeof(ushort), BUFFERSIZE, BufferUsage.WriteOnly);
+            vertexBuffer2 = new VertexBuffer(gpu, typeof(VertexPositionNormalTexture), BUFFERSIZE, BufferUsage.WriteOnly);
+            indexBuffer2 = new IndexBuffer(gpu, typeof(ushort), BUFFERSIZE, BufferUsage.WriteOnly);
+            vertexBuffer3 = new VertexBuffer(gpu, typeof(VertexPositionNormalTexture), BUFFERSIZE, BufferUsage.WriteOnly);
+            indexBuffer3 = new IndexBuffer(gpu, typeof(ushort), BUFFERSIZE, BufferUsage.WriteOnly);
+
+
+            int Height = 30 + (int)(Math.Sin(Position.X/16) * 5) + (int)(Math.Sin(Position.Y / 16) * 5);
+
+            if (Math.Abs(Position.X / 16) == 9 || Math.Abs(Position.Y / 16) == 9) Height = 50;
+
 
             for (int x = 0; x < blocks.GetLength(0); x++)
             {
-                for (int y = 1; y < blocks.GetLength(1); y++)
+                for (int y = 0; y < Height; y++)
                 {
                     for (int z = 0; z < blocks.GetLength(2); z++)
                     {
@@ -105,14 +114,14 @@ namespace DiscCraft
 
             for (int x = 0; x < blocks.GetLength(0); x++)
             {
-                for (int y = 0; y < 1; y++)
-                {
+                //for (int y = 0; y < 1; y++)
+                //{
                     for (int z = 0; z < blocks.GetLength(2); z++)
                     {
-                        if(Random.Shared.Next(0, 2) == 1)
-                            blocks[x, y, z] = new Block(1);
+                        //if(Random.Shared.Next(0, 2) == 1)
+                        blocks[x, Height, z] = new Block(1);
                     }
-                }
+                //}
             }
 
             //Console.WriteLine(vertexCount);
@@ -124,7 +133,7 @@ namespace DiscCraft
 
             VertexIndex = 0;
 
-            for (int x = 0; x < blocks.GetLength(0); x++)
+            /*for (int x = 0; x < blocks.GetLength(0); x++)
             {
                 for (int y = 0; y < 1; y++)
                 {
@@ -132,20 +141,20 @@ namespace DiscCraft
                     {
                         /// TODO : Block Adder
                         if (blocks[x, y, z] != null)
-                            AddBlock(new Vector3(x + Position.X, -y, z + Position.Y), new Vector3(x, y, z), 1);
+                            AddBlock(new Vector3(x + Position.X, y, z + Position.Y), new Vector3(x, y, z), 1);
                     }
                 }
-            }
+            }*/
 
             for (int x = 0; x < blocks.GetLength(0); x++)
             {
-                for (int y = 1; y < 16; y++)
+                for (int y = 0; y < 16; y++)
                 {
                     for (int z = 0; z < blocks.GetLength(2); z++)
                     {
                         /// TODO : Block Adder
                         if (blocks[x, y, z] != null)
-                            AddBlock(new Vector3(x + Position.X, -y, z + Position.Y), new Vector3(x, y, z), 2);
+                            AddBlock(new Vector3(x + Position.X, y, z + Position.Y), new Vector3(x, y, z), blocks[x,y,z].ID);
                     }
                 }
             }
@@ -162,7 +171,7 @@ namespace DiscCraft
                     {
                         /// TODO : Block Adder
                         if (blocks[x, y, z] != null)
-                            AddBlock(new Vector3(x + Position.X, -y, z + Position.Y), new Vector3(x, y, z), 2);
+                            AddBlock(new Vector3(x + Position.X, y, z + Position.Y), new Vector3(x, y, z), blocks[x, y, z].ID);
                     }
                 }
             }
@@ -179,7 +188,7 @@ namespace DiscCraft
                     {
                         /// TODO : Block Adder
                         if (blocks[x, y, z] != null)
-                            AddBlock(new Vector3(x + Position.X, -y, z + Position.Y), new Vector3(x, y, z), 2);
+                            AddBlock(new Vector3(x + Position.X, y, z + Position.Y), new Vector3(x, y, z), blocks[x, y, z].ID);
                     }
                 }
             }
@@ -196,10 +205,43 @@ namespace DiscCraft
                     {
                         /// TODO : Block Adder
                         if (blocks[x, y, z] != null)
-                            AddBlock(new Vector3(x + Position.X, -y, z + Position.Y), new Vector3(x, y, z), 2);
+                            AddBlock(new Vector3(x + Position.X, y, z + Position.Y), new Vector3(x, y, z), blocks[x, y, z].ID);
                     }
                 }
             }
+
+
+            /*var v = vertex.ToArray();
+            var v1 = vertex.ToArray();
+            var v2 = vertex.ToArray();
+            var v3 = vertex.ToArray();
+
+            var i = indices.ToArray();
+            var i1 = indices1.ToArray();
+            var i2 = indices2.ToArray();
+            var i3 = indices3.ToArray();
+
+
+            vertexBuffer = new VertexBuffer(gpu, typeof(VertexPositionNormalTexture), v.Length, BufferUsage.WriteOnly);
+            indexBuffer = new IndexBuffer(gpu, typeof(ushort), i.Length, BufferUsage.WriteOnly);
+            vertexBuffer1 = new VertexBuffer(gpu, typeof(VertexPositionNormalTexture), v1.Length, BufferUsage.WriteOnly);
+            indexBuffer1 = new IndexBuffer(gpu, typeof(ushort), i1.Length, BufferUsage.WriteOnly);
+            vertexBuffer2 = new VertexBuffer(gpu, typeof(VertexPositionNormalTexture), v2.Length, BufferUsage.WriteOnly);
+            indexBuffer2 = new IndexBuffer(gpu, typeof(ushort), i2.Length, BufferUsage.WriteOnly);
+            vertexBuffer3 = new VertexBuffer(gpu, typeof(VertexPositionNormalTexture), v2.Length, BufferUsage.WriteOnly);
+            indexBuffer3 = new IndexBuffer(gpu, typeof(ushort), i3.Length, BufferUsage.WriteOnly);
+
+
+            vertexBuffer.SetData<VertexPositionNormalTexture>(v);
+            indexBuffer.SetData<ushort>(i);
+
+            vertexBuffer1.SetData<VertexPositionNormalTexture>(v1);
+            indexBuffer1.SetData<ushort>(i1);
+            vertexBuffer2.SetData<VertexPositionNormalTexture>(v2);
+            indexBuffer2.SetData<ushort>(i2);
+            vertexBuffer3.SetData<VertexPositionNormalTexture>(v3);
+            indexBuffer3.SetData<ushort>(i3);*/
+
 
             vertexBuffer.SetData<VertexPositionNormalTexture>(vertex);
             indexBuffer.SetData<ushort>(indices);
@@ -210,6 +252,7 @@ namespace DiscCraft
             indexBuffer2.SetData<ushort>(indices2);
             vertexBuffer3.SetData<VertexPositionNormalTexture>(vertex3);
             indexBuffer3.SetData<ushort>(indices3);
+
 
             isDrawed = true;
 
@@ -335,7 +378,9 @@ namespace DiscCraft
 
             float u1 = 0, v1 = 0, u2 = 1, v2 = 1, hw = size.X / 2, hl = size.Z / 2, hh = size.Y / 2; // uv's, half-width, half-length, half-height
             GetUVCoords(ref u1, ref v1, ref u2, ref v2, GetSourceRect(type)[0]);
-            float t = Pos.Y - hh, b = Pos.Y + hh, l = Pos.X - hw, r = Pos.X + hw, n = Pos.Z - hl, f = Pos.Z + hl;  // y-coord, left, right, near, far
+            //float t = Pos.Y - hh, b = Pos.Y + hh, l = Pos.X - hw, r = Pos.X + hw, n = Pos.Z - hl, f = Pos.Z + hl;  // y-coord, left, right, near, far
+            
+            float t = Pos.Y, b = Pos.Y + 1, l = Pos.X, r = Pos.X + 1, n = Pos.Z, f = Pos.Z + 1;  // y-coord, left, right, near, far
 
 
             bool front = false, back = false, left = false, right = false, up = false, down = false;
@@ -343,11 +388,11 @@ namespace DiscCraft
             GetAdjacentBlock(PosInChunk, ref front, ref back, ref left, ref right, ref up, ref down);
 
 
-            if (Pos.Y < Main.cameraV2.Position.Y) down = true;
+            /*if (Pos.Y < Main.cameraV2.Position.Y) down = true;
             if (Pos.X < Main.cameraV2.Position.X) right = true;
             if (Pos.X > Main.cameraV2.Position.X) left = true;
             if (Pos.Z < Main.cameraV2.Position.Z) front = true;
-            if (Pos.Z > Main.cameraV2.Position.Z) back = true;
+            if (Pos.Z > Main.cameraV2.Position.Z) back = true;*/
 
 
             Vector3 norm = Vector3.Up;
@@ -544,15 +589,15 @@ namespace DiscCraft
 
 
 
-            if (y > 0)
+            if (y < blocks.GetLength(1) - 1)
             {
-                if (blocks[x, y - 1, z] == null) up = false;
+                if (blocks[x, y + 1, z] == null) up = false;
                 else up = true;
             }
 
-            if (y < blocks.GetLength(1) - 1)
+            if (y > 0)
             {
-                if (blocks[x, y + 1, z] == null) down = false;
+                if (blocks[x, y - 1, z] == null) down = false;
                 else down = true;
             }
 

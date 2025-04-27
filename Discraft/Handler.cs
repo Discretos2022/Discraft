@@ -175,7 +175,7 @@ namespace DiscCraft_2
         public static void Draw(GraphicsDevice gpu, BasicEffect basicEffect, Camera camera)
         {
 
-            viewLength = 12;
+            viewLength = 10; // 8
 
             //for (int i = 0; i < chunks.GetLength(0); i++)
             //{
@@ -188,40 +188,48 @@ namespace DiscCraft_2
             //    }
             //}
 
-            for (int i = 0; i < chunks.Count; i++)
+
+            lock (chunks)
             {
-
-                ///Vector2 point = (new Vector2(Main.cameraV2.cameraLookAt.X, Main.cameraV2.cameraLookAt.Z) - new Vector2(Main.cameraV2.Position.X, Main.cameraV2.Position.Z)) * 120 + new Vector2(Main.cameraV2.Position.X, Main.cameraV2.Position.Z);
-
-                ///KeyValuePair<Vect2, Chunk> chunk = chunks.ElementAt(i);
-                //if (Vector2.Distance(chunk.Key * 16, new Vector2(Main.cameraV2.Position.X, Main.cameraV2.Position.Z)) < 350)
-                //{
-
-                //float num = Util.GetAngleBetweenVector(new Vector2(Main.cameraV2.cameraLookAt.X, Main.cameraV2.cameraLookAt.Z), new Vector2(Main.cameraV2.Position.X - chunk.Key.X * 16, Main.cameraV2.Position.Z - chunk.Key.Y * 16)); //Util.GetAngleBetweenVector(new Vector2(Main.cameraV2.Rotation.Y, Main.cameraV2.Rotation.Y) + new Vector2(Main.cameraV2.Position.X, Main.cameraV2.Position.Z), new Vector2(Main.cameraV2.Position.X - chunk.Key.X * 16, Main.cameraV2.Position.Y - chunk.Key.Y * 16));
-
-                //if (chunk.Key == Vector2.Zero)
-                //Console.WriteLine(num);
-
-                ///chunks[chunk.Key].isDrawed = true;
-                ///if (Vector2.Distance(new Vector2(chunk.Key.X + 0.5f, chunk.Key.Y + 0.5f) * 16, point) > 128)//(Util.GetAngleBetweenVector(new Vector2(Main.cameraV2.cameraLookAt.X, Main.cameraV2.cameraLookAt.Z), new Vector2(Main.cameraV2.Position.X - chunk.Key.X * 16, Main.cameraV2.Position.Z - chunk.Key.Y * 16)) <= 0.025f) //if (Util.GetAngleBetweenVector(new Vector2(Main.cameraV2.cameraLookAt.X, Main.cameraV2.cameraLookAt.Y), new Vector2(Main.cameraV2.Position.X - chunk.Key.X * 16, Main.cameraV2.Position.Y - chunk.Key.Y * 16)) >= 0.025f) // 0.05
-                ///chunks[chunk.Key].isDrawed = false;
-                ///else
-                ///chunks[chunk.Key].Draw(gpu, basicEffect);
-                ///
-                try
+                for (int i = 0; i < chunks.Count; i++)
                 {
-                    chunks.ElementAt(i).Value.Draw(gpu, basicEffect);
+
+                    ///Vector2 point = (new Vector2(Main.cameraV2.cameraLookAt.X, Main.cameraV2.cameraLookAt.Z) - new Vector2(Main.cameraV2.Position.X, Main.cameraV2.Position.Z)) * 120 + new Vector2(Main.cameraV2.Position.X, Main.cameraV2.Position.Z);
+
+                    ///KeyValuePair<Vect2, Chunk> chunk = chunks.ElementAt(i);
+                    //if (Vector2.Distance(chunk.Key * 16, new Vector2(Main.cameraV2.Position.X, Main.cameraV2.Position.Z)) < 350)
+                    //{
+
+                    //float num = Util.GetAngleBetweenVector(new Vector2(Main.cameraV2.cameraLookAt.X, Main.cameraV2.cameraLookAt.Z), new Vector2(Main.cameraV2.Position.X - chunk.Key.X * 16, Main.cameraV2.Position.Z - chunk.Key.Y * 16)); //Util.GetAngleBetweenVector(new Vector2(Main.cameraV2.Rotation.Y, Main.cameraV2.Rotation.Y) + new Vector2(Main.cameraV2.Position.X, Main.cameraV2.Position.Z), new Vector2(Main.cameraV2.Position.X - chunk.Key.X * 16, Main.cameraV2.Position.Y - chunk.Key.Y * 16));
+
+                    //if (chunk.Key == Vector2.Zero)
+                    //Console.WriteLine(num);
+
+                    ///chunks[chunk.Key].isDrawed = true;
+                    ///if (Vector2.Distance(new Vector2(chunk.Key.X + 0.5f, chunk.Key.Y + 0.5f) * 16, point) > 128)//(Util.GetAngleBetweenVector(new Vector2(Main.cameraV2.cameraLookAt.X, Main.cameraV2.cameraLookAt.Z), new Vector2(Main.cameraV2.Position.X - chunk.Key.X * 16, Main.cameraV2.Position.Z - chunk.Key.Y * 16)) <= 0.025f) //if (Util.GetAngleBetweenVector(new Vector2(Main.cameraV2.cameraLookAt.X, Main.cameraV2.cameraLookAt.Y), new Vector2(Main.cameraV2.Position.X - chunk.Key.X * 16, Main.cameraV2.Position.Y - chunk.Key.Y * 16)) >= 0.025f) // 0.05
+                    ///chunks[chunk.Key].isDrawed = false;
+                    ///else
+                    ///chunks[chunk.Key].Draw(gpu, basicEffect);
+                    ///
+                    try
+                    {
+                        //if(chunks.ElementAt(i).Key == new Vect2(0, 0))
+                        chunks.ElementAt(i).Value.Draw(gpu, basicEffect);
+                    }
+                    catch (InvalidOperationException e)
+                    {
+                        Console.WriteLine(e);
+                        continue;
+                    }
+
+
+
+                    //}
+
                 }
-                catch (InvalidOperationException e)
-                {
-                    continue;
-                }
-                
+            }
 
-
-                //}
-
-            }            
+                        
 
         }
 
@@ -261,7 +269,7 @@ namespace DiscCraft_2
             while (true)
             {
 
-                Console.WriteLine("Thread Chunk loader is operationnal !");
+                //Console.WriteLine("Thread Chunk loader is operationnal !");
 
                 Vect2 plr = new Vect2((int)Main.cameraV2.Position.X, (int)Main.cameraV2.Position.Z);
                 plr = plr / 16;
@@ -314,7 +322,7 @@ namespace DiscCraft_2
                     }
                 }
 
-                //Thread.Sleep(1000); // 1000
+                //Thread.Sleep(100); // 1000
 
 
             }
@@ -421,31 +429,65 @@ namespace DiscCraft_2
             {
 
                 Vect2 playerPos = new Vect2((int)Main.cameraV2.Position.X, (int)Main.cameraV2.Position.Z);
-                chunkStack.OrderBy((x) => (-Vect2.Distance(x, playerPos)));
+                //chunkStack.OrderBy((x) => (-Vect2.Distance(x * 16, playerPos)));
 
                 for (int i = 0; i < chunkStack.Count; i++)
                 {
                     if (chunks.ContainsKey(chunkStack[i]))
-                        if (chunks[chunkStack[i]].isDrawed == false)
-                            if(chunks.ContainsKey(new Vect2(chunkStack[i].X + 1, chunkStack[i].Y)))
-                                if (chunks.ContainsKey(new Vect2(chunkStack[i].X - 1, chunkStack[i].Y)))
-                                    if (chunks.ContainsKey(new Vect2(chunkStack[i].X, chunkStack[i].Y + 1)))
-                                        if (chunks.ContainsKey(new Vect2(chunkStack[i].X, chunkStack[i].Y - 1)))
-                                        {
-                                            Main.VERTEX -= chunks[chunkStack[i]].VERTEX;
-                                            Main.TRIANGLES -= chunks[chunkStack[i]].TRIANGLES;
-                                            chunks[chunkStack[i]].InitVertexBuffer();
-                                            Main.VERTEX += chunks[chunkStack[i]].VERTEX;
-                                            Main.TRIANGLES += chunks[chunkStack[i]].TRIANGLES;
-                                        }
-                    //chunkStack.Remove(chunkStack[i]);
-                }
+                        //if (chunks[chunkStack[i]].isDrawed == false)
+                        if (chunks.ContainsKey(new Vect2(chunkStack[i].X + 1, chunkStack[i].Y)))
+                            if (chunks.ContainsKey(new Vect2(chunkStack[i].X - 1, chunkStack[i].Y)))
+                                if (chunks.ContainsKey(new Vect2(chunkStack[i].X, chunkStack[i].Y + 1)))
+                                    if (chunks.ContainsKey(new Vect2(chunkStack[i].X, chunkStack[i].Y - 1)))
+                                    {
+                                        Main.VERTEX -= chunks[chunkStack[i]].VERTEX;
+                                        Main.TRIANGLES -= chunks[chunkStack[i]].TRIANGLES;
+                                        chunks[chunkStack[i]].InitVertexBuffer();
+                                        Main.VERTEX += chunks[chunkStack[i]].VERTEX;
+                                        Main.TRIANGLES += chunks[chunkStack[i]].TRIANGLES;
+                                        chunkStack.Remove(chunkStack[i]);
+                                    }
 
-                Thread.Sleep(100);
+                }
+                
+
+                //Thread.Sleep(100);
 
             }
 
         }
+
+
+
+
+
+        public static Chunk GetChunkWithBlockCoord(Vector3 blockCoord)
+        {
+            Vect2 chunkCoord = new Vect2(MathUtils.RoundLower(blockCoord.X / 16), MathUtils.RoundLower(blockCoord.Z / 16));
+
+            if (blockCoord.X < 0 && (int)(blockCoord.X / 16) == (blockCoord.X / 16)) chunkCoord.X += 1;
+            if (blockCoord.Z < 0 && (int)(blockCoord.Z / 16) == (blockCoord.Z / 16)) chunkCoord.Y += 1;
+
+            if (chunks.ContainsKey(chunkCoord) && blockCoord.Y >= 0 && blockCoord.Y < 64)
+                return chunks[chunkCoord];
+            else 
+                return null;
+        }
+
+        public static Vector3 GetBlockCoordInChunk(Vector3 blockCoord)
+        {
+            int X = (int)(((blockCoord.X / 16) - MathUtils.RoundLower(blockCoord.X / 16)) * 16);
+            int Z = (int)(((blockCoord.Z / 16) - MathUtils.RoundLower(blockCoord.Z / 16)) * 16);
+
+            //if (blockCoord.X < 0) X -= 1;
+            //if (blockCoord.X < 0) X -= 1;
+
+            if (X == 16) X = 0;
+            if (Z == 16) Z = 0;
+
+            return new Vector3(X, blockCoord.Y, Z);
+        }
+
 
 
     }
