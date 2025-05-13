@@ -4,6 +4,12 @@ using Discraft;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 
 //Vector3 start = new Vector3(0.5f, -10, 0.5f);
 //Vector3 end = new Vector3(0.5f, 2, 0.5f);
@@ -41,6 +47,32 @@ if (blockCoord.Z < 0 && (int)(blockCoord.Z / 16) == (blockCoord.Z / 16)) chunkCo
 
 Console.WriteLine(X + " ; " + Z);
 Console.WriteLine(chunkCoord.X + " ; " + chunkCoord.Y);*/
+
+
+/*Stopwatch sw = new Stopwatch();
+
+int[] tab = new int[20000];
+
+for (int i = 0; i < tab.Length; i++)
+{
+    tab[i] = i;
+}
+
+sw.Start();
+
+tab.ToArray();
+
+Console.WriteLine("ELAPSED TIME : " + sw.ElapsedMilliseconds);*/
+
+
+/*Vector2 start = new Vector2 (0, 0);
+Vector2 end = new Vector2 (6, 8);
+
+Rectangle rect = new Rectangle(5,5,2,2);
+
+Console.WriteLine(CollisionHelper.LineRect(start, end, rect));*/
+
+
 
 using var game = new DiscCraft.Main();
 game.Run();

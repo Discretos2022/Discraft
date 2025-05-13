@@ -1,4 +1,5 @@
 ﻿using DiscCraft;
+using Discraft;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
@@ -36,6 +37,9 @@ namespace DiscCraft_2
         public static Thread chunkUpdater;
 
         public static int viewLength = 10;
+
+        public static int MAX_TASK = 100;
+        public static int tasknum = 0;
 
 
         public static void Init(GraphicsDevice gpu)
@@ -158,16 +162,16 @@ namespace DiscCraft_2
             Console.WriteLine("[==========]");*/
 
             chunkLoader = new Thread(() => CheckChunk(gpu));
-            chunkLoader.Priority = ThreadPriority.Lowest;
+            chunkLoader.Priority = ThreadPriority.Highest;
             chunkLoader.Start();
 
-            chunkUnloader = new Thread(() => UnloadChunk());
+            /*chunkUnloader = new Thread(() => UnloadChunk());
             chunkUnloader.Priority = ThreadPriority.Lowest;
-            chunkUnloader.Start();
+            chunkUnloader.Start();*/
 
-            chunkUpdater = new Thread(() => UpdateChunk());
+            /*chunkUpdater = new Thread(() => UpdateChunk());
             chunkUpdater.Priority = ThreadPriority.Lowest;
-            chunkUpdater.Start();
+            chunkUpdater.Start();*/
 
         }
 
@@ -175,7 +179,7 @@ namespace DiscCraft_2
         public static void Draw(GraphicsDevice gpu, BasicEffect basicEffect, Camera camera)
         {
 
-            viewLength = 10; // 8
+            viewLength = 3; // 8
 
             //for (int i = 0; i < chunks.GetLength(0); i++)
             //{
@@ -189,7 +193,21 @@ namespace DiscCraft_2
             //}
 
 
-            lock (chunks)
+            Main.drawedChunk = 0;
+            int max = chunkBufferQueue.Count;
+            for (int i = 0; i < max; i++)
+            {
+                if (chunkBufferQueue[i].hasVertex)
+                {
+                    chunkBufferQueue[i].Draw(basicEffect);
+                    Main.drawedChunk += 1;
+                }
+            }
+
+
+
+
+            /*lock (chunks)
             {
                 for (int i = 0; i < chunks.Count; i++)
                 {
@@ -227,7 +245,7 @@ namespace DiscCraft_2
                     //}
 
                 }
-            }
+            }*/
 
                         
 
@@ -284,10 +302,16 @@ namespace DiscCraft_2
                         {
                             try
                             {
-                                chunks.Add(new Vect2(i, j), new Chunk(new Vect2(i, j), gpu));
+
+                                Chunk c = new Chunk(new Vect2(i, j), gpu);
+
+                                chunks.Add(new Vect2(i, j), c);
                                 //chunks[new Vect2(i, j)].InitVertexBuffer();
 
                                 chunkStack.Add(new Vect2(i, j));
+
+                                //for (int h = 0; h < 4; h++)
+                                    //GenerateChunkVertexTask(new Vect2(i, j), h, gpu);
 
                                 //for (int x = i - 1; x <= i + 1; x++)
                                 //{
@@ -306,7 +330,11 @@ namespace DiscCraft_2
 
 
                             }
-                            catch (ArgumentException e) { }
+                            catch (ArgumentException e) 
+                            {
+                                Console.WriteLine(e);
+                            
+                            }
 
                             /*if (chunks.ContainsKey(new Vect2(i - 1, j)))
                                 chunkStack.Add(new Vect2(i - 1, j));
@@ -321,6 +349,39 @@ namespace DiscCraft_2
 
                     }
                 }
+
+                //Thread.Sleep(1000);
+
+
+                for (int i = plr.X - viewLength; i <= plr.X + viewLength; i++)
+                {
+                    for (int j = plr.Y - viewLength; j <= plr.Y + viewLength; j++)
+                    {
+
+                        if (chunks.ContainsKey(new Vect2(i, j)))
+                        {
+                            try
+                            {
+                                
+                                //for (int h = 0; h < 4; h++)
+                                if (tasknum <= MAX_TASK)
+                                    if (chunks[new Vect2(i, j)].loaded[1] == 0)
+                                    {
+                                        chunks[new Vect2(i, j)].loaded[1] = 1;
+                                        //Thread.Sleep(20);
+                                        GenerateChunkVertexTask(new Vect2(i, j), 0, gpu);
+                                    }
+
+                            }
+                            catch (ArgumentException e) {
+                                Console.WriteLine(e);
+                            }
+
+                        }
+
+                    }
+                }
+
 
                 //Thread.Sleep(100); // 1000
 
@@ -342,6 +403,7 @@ namespace DiscCraft_2
 
                 if(chunkStack.Contains(new Vect2(i, j)))
                     chunkStack.Add(new Vect2(i, j));
+
 
                 //for (int x = i - 1; x <= i + 1; x++)
                 //{
@@ -454,6 +516,86 @@ namespace DiscCraft_2
                 //Thread.Sleep(100);
 
             }
+
+        }
+
+
+        public static List<ChunkBuffer> chunkBufferQueue = new List<ChunkBuffer>();
+
+
+        public static void GenerateChunkVertexTask(Vect2 chunk, int yCoord, GraphicsDevice gpu)
+        {
+
+            //Task task = new Task(() => {
+
+                for (int h = 0; h < 4; h++)
+                {
+                    ChunkBuffer b = new ChunkBuffer(gpu, chunk, h);
+
+                    b.BuildVertex(chunks[chunk].blocks);
+                    if (b.hasVertex)
+                        b.BuildBuffer();
+
+                chunkBufferQueue.Add(b);
+                //Console.WriteLine("--> " + chunk.X + ";" + chunk.Y + " | " + b.vertexCount);
+                Main.VERTEX += b.vertexCount;
+
+                tasknum -= 1;
+
+            }
+
+            //});
+
+            tasknum += 1;
+            //task.Start();
+
+            //Console.WriteLine(task.Exception);
+
+
+        }
+
+        public static void UpdateChunkVertexTask(Vect2 chunk, GraphicsDevice gpu)
+        {
+
+            //Task task = new Task(() => {
+
+            for (int h = 0; h < 4; h++)
+            {
+                ChunkBuffer b = new ChunkBuffer(gpu, chunk, h);
+
+                b.BuildVertex(chunks[chunk].blocks);
+                if (b.hasVertex)
+                {
+                    b.BuildBuffer();
+
+                    lock (chunkBufferQueue)
+                    {
+                        for (int i = 0; i < chunkBufferQueue.Count; i++)
+                        {
+                            if (chunkBufferQueue[i].Position == chunk && chunkBufferQueue[i].yCoord == h)
+                            {
+                                Main.VERTEX -= chunkBufferQueue[i].vertexCount;
+                                chunkBufferQueue[i] = b;
+                            }
+                        }
+
+                    }
+                    
+                    //Console.WriteLine("--> " + chunk.X + ";" + chunk.Y + " | " + b.vertexCount);
+                    Main.VERTEX += b.vertexCount;
+
+                    tasknum -= 1;
+
+                }
+            }
+
+            //});
+
+            tasknum += 1;
+            //task.Start();
+
+            //Console.WriteLine(task.Exception);
+
 
         }
 

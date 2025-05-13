@@ -61,7 +61,7 @@ namespace DiscCraft
             cameraSpeed = speed;
 
             /// Setup projection matrix
-            Projection = Matrix.CreatePerspectiveFieldOfView(MathHelper.PiOver4, game.GraphicsDevice.Viewport.AspectRatio, 0.05f, 600);//256.0f); // game.GraphicsDevice.Viewport.AspectRatio
+            Projection = Matrix.CreatePerspectiveFieldOfView(MathHelper.PiOver4, game.GraphicsDevice.Viewport.AspectRatio, 0.05f, 2000);//256.0f); // game.GraphicsDevice.Viewport.AspectRatio
 
             /// Set camera position
             MoveTo(position, rotation);

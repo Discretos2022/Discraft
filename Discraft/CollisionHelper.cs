@@ -16,16 +16,37 @@ namespace Discraft
 
             RectangleBorder resXY = LineRect(new Vector2(start.X, start.Y), new Vector2(end.X, end.Y), new Rectangle((int)block.X, (int)block.Y, 1, 1));
             RectangleBorder resXZ = LineRect(new Vector2(start.X, start.Z), new Vector2(end.X, end.Z), new Rectangle((int)block.X, (int)block.Z, 1, 1));
-            RectangleBorder resYZ = LineRect(new Vector2(start.Y, start.Z), new Vector2(end.Y, end.Z), new Rectangle((int)block.Y, (int)block.Z, 1, 1));
+            RectangleBorder resYZ = LineRect(new Vector2(start.Z, start.Y), new Vector2(end.Z, end.Y), new Rectangle((int)block.Z, (int)block.Y, 1, 1));
 
 
             if (resXY == RectangleBorder.None || resXZ == RectangleBorder.None || resYZ == RectangleBorder.None)
                 return BlockFace.None;
 
-            if (resXY == RectangleBorder.Top) return BlockFace.Top;
+           if (resXY == RectangleBorder.Left && resXZ == RectangleBorder.Left)
+                return BlockFace.Left;
+            if (resXY == RectangleBorder.Right && resXZ == RectangleBorder.Right)
+                return BlockFace.Right;
+
+
+            if (resXY == RectangleBorder.Top && resYZ == RectangleBorder.Top)
+                return BlockFace.Top;
+
+            if (resXY == RectangleBorder.Bottom && resYZ == RectangleBorder.Bottom)
+                return BlockFace.Bottom;
+
+
+            if (resXZ == RectangleBorder.Bottom && resYZ == RectangleBorder.Left)
+                return BlockFace.Front;
+
+            if (resXZ == RectangleBorder.Top && resYZ == RectangleBorder.Right)
+                return BlockFace.Back;
+
+
+
+            /*if (resXY == RectangleBorder.Top) return BlockFace.Top;
             if (resXY == RectangleBorder.Bottom) return BlockFace.Bottom;
             if (resXY == RectangleBorder.Left) return BlockFace.Left;
-            if (resXY == RectangleBorder.Right) return BlockFace.Right;
+            if (resXY == RectangleBorder.Right) return BlockFace.Right;*/
 
             return BlockFace.None;
         }
@@ -33,24 +54,72 @@ namespace Discraft
         public static RectangleBorder LineRect(Vector2 start, Vector2 end, Rectangle rect)
         {
 
+            Vector2 oldInter = Vector2.Zero;
             Vector2 inter = Vector2.Zero;
+            RectangleBorder border = RectangleBorder.None;
 
             if (LineLine(start, end, new Vector2(rect.X, rect.Y), new Vector2(rect.X + rect.Width, rect.Y), out inter))
-                return RectangleBorder.Top;
+            {
+                if (border == RectangleBorder.None) 
+                {
+                    border = RectangleBorder.Bottom;
+                    oldInter = inter;
+                }
+                else if (Vector2.Distance(start, oldInter) > Vector2.Distance(start, inter))
+                {
+                    border = RectangleBorder.Bottom;
+                    oldInter = inter;
+                }
+            }
 
             if (LineLine(start, end, new Vector2(rect.X + rect.Width, rect.Y), new Vector2(rect.X + rect.Width, rect.Y + rect.Height), out inter))
-                return RectangleBorder.Right;
+            {
+                if (border == RectangleBorder.None)
+                {
+                    border = RectangleBorder.Right;
+                    oldInter = inter;
+                }
+                else if (Vector2.Distance(start, oldInter) > Vector2.Distance(start, inter))
+                {
+                    border = RectangleBorder.Right;
+                    oldInter = inter;
+                }
+            }
 
             if (LineLine(start, end, new Vector2(rect.X, rect.Y + rect.Height), new Vector2(rect.X + rect.Width, rect.Y + rect.Height), out inter))
-                return RectangleBorder.Bottom;
+            {
+                if (border == RectangleBorder.None)
+                {
+                    border = RectangleBorder.Top;
+                    oldInter = inter;
+                }
+                else if (Vector2.Distance(start, oldInter) > Vector2.Distance(start, inter))
+                {
+                    border = RectangleBorder.Top;
+                    oldInter = inter;
+                }
+            }
 
             if (LineLine(start, end, new Vector2(rect.X, rect.Y), new Vector2(rect.X, rect.Y + rect.Height), out inter))
-                return RectangleBorder.Right;
+            {
+                if (border == RectangleBorder.None)
+                {
+                    border = RectangleBorder.Left;
+                    oldInter = inter;
+                }
+                else if (Vector2.Distance(start, oldInter) > Vector2.Distance(start, inter))
+                {
+                    border = RectangleBorder.Left;
+                    oldInter = inter;
+                }
+            }
 
             if (RectContainsPoint(start, rect) && RectContainsPoint(end, rect))
-                return RectangleBorder.Center;
+            {
+                border = RectangleBorder.Center;
+            }
 
-            return RectangleBorder.None;
+            return border;
         }
 
         public static bool LineLine(Vector2 s1, Vector2 e1, Vector2 s2, Vector2 e2, out Vector2 intersectionPoint)

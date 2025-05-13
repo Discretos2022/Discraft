@@ -72,6 +72,8 @@ namespace DiscCraft
         public int VERTEX = 0;
         public int TRIANGLES = 0;
 
+        public int[] loaded = new int[4];
+
 
         public Chunk(Vect2 _position, GraphicsDevice _gpu)
         {
@@ -85,7 +87,12 @@ namespace DiscCraft
 
             Position = Position * 16;
 
-            vertexBuffer = new VertexBuffer(gpu, typeof(VertexPositionNormalTexture), BUFFERSIZE, BufferUsage.WriteOnly);
+            loaded[0] = 0;
+            loaded[1] = 0;
+            loaded[2] = 0;
+            loaded[3] = 0;
+
+            /*vertexBuffer = new VertexBuffer(gpu, typeof(VertexPositionNormalTexture), BUFFERSIZE, BufferUsage.WriteOnly);
             indexBuffer = new IndexBuffer(gpu, typeof(ushort), BUFFERSIZE, BufferUsage.WriteOnly);
 
             vertexBuffer1 = new VertexBuffer(gpu, typeof(VertexPositionNormalTexture), BUFFERSIZE, BufferUsage.WriteOnly);
@@ -93,36 +100,74 @@ namespace DiscCraft
             vertexBuffer2 = new VertexBuffer(gpu, typeof(VertexPositionNormalTexture), BUFFERSIZE, BufferUsage.WriteOnly);
             indexBuffer2 = new IndexBuffer(gpu, typeof(ushort), BUFFERSIZE, BufferUsage.WriteOnly);
             vertexBuffer3 = new VertexBuffer(gpu, typeof(VertexPositionNormalTexture), BUFFERSIZE, BufferUsage.WriteOnly);
-            indexBuffer3 = new IndexBuffer(gpu, typeof(ushort), BUFFERSIZE, BufferUsage.WriteOnly);
+            indexBuffer3 = new IndexBuffer(gpu, typeof(ushort), BUFFERSIZE, BufferUsage.WriteOnly);*/
 
 
             int Height = 30 + (int)(Math.Sin(Position.X/16) * 5) + (int)(Math.Sin(Position.Y / 16) * 5);
 
             if (Math.Abs(Position.X / 16) == 9 || Math.Abs(Position.Y / 16) == 9) Height = 50;
+            if (Math.Abs(Position.X / 16) == 10 || Math.Abs(Position.Y / 16) == 10) Height = 50;
+            if (Math.Abs(Position.X / 16) == 11 || Math.Abs(Position.Y / 16) == 11) Height = 50;
+
+            //Height = 60;
 
 
-            for (int x = 0; x < blocks.GetLength(0); x++)
+            if (Height != 50)
             {
-                for (int y = 0; y < Height; y++)
+                for (int x = 0; x < blocks.GetLength(0); x++)
                 {
-                    for (int z = 0; z < blocks.GetLength(2); z++)
+                    for (int y = 0; y < Height; y++)
                     {
-                        blocks[x, y, z] = new Block(2);
+                        for (int z = 0; z < blocks.GetLength(2); z++)
+                        {
+                            blocks[x, y, z] = new Block(2);
+                        }
                     }
                 }
-            }
 
-            for (int x = 0; x < blocks.GetLength(0); x++)
-            {
-                //for (int y = 0; y < 1; y++)
-                //{
+                for (int x = 0; x < blocks.GetLength(0); x++)
+                {
+                    //for (int y = 0; y < 1; y++)
+                    //{
                     for (int z = 0; z < blocks.GetLength(2); z++)
                     {
                         //if(Random.Shared.Next(0, 2) == 1)
                         blocks[x, Height, z] = new Block(1);
                     }
-                //}
+                    //}
+                }
             }
+            else
+            {
+                for (int x = 0; x < blocks.GetLength(0); x++)
+                {
+                    for (int y = 0; y < Height; y++)
+                    {
+                        for (int z = 0; z < blocks.GetLength(2); z++)
+                        {
+                            blocks[x, y, z] = new Block(3);
+                        }
+                    }
+                }
+
+                for (int x = 0; x < blocks.GetLength(0); x++)
+                {
+                    //for (int y = 0; y < 1; y++)
+                    //{
+                    for (int z = 0; z < blocks.GetLength(2); z++)
+                    {
+                        //if(Random.Shared.Next(0, 2) == 1)
+                        blocks[x, Height, z] = new Block(3);
+                    }
+                    //}
+                }
+            }
+
+            if(Position == new Vect2(0, 0))
+            {
+                blocks[0, 50, 0] = new Block(3);
+            }
+            
 
             //Console.WriteLine(vertexCount);
 
@@ -544,6 +589,15 @@ namespace DiscCraft
                     rects[3] = new Rectangle(34 + Util.random.Next(0, 1) * 17, 0, 16, 16);     /// Right
                     rects[4] = new Rectangle(34 + Util.random.Next(0, 1) * 17, 0, 16, 16);     /// Front
                     rects[5] = new Rectangle(34 + Util.random.Next(0, 1) * 17, 0, 16, 16);     /// Back
+                    break;
+
+                case 3:
+                    rects[0] = new Rectangle(68, 0, 16, 16);     /// Down
+                    rects[1] = new Rectangle(68, 0, 16, 16);     /// Left
+                    rects[2] = new Rectangle(68, 0, 16, 16);     /// Up
+                    rects[3] = new Rectangle(68, 0, 16, 16);     /// Right
+                    rects[4] = new Rectangle(68, 0, 16, 16);     /// Front
+                    rects[5] = new Rectangle(68, 0, 16, 16);     /// Back
                     break;
             }
 

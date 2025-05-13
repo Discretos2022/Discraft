@@ -94,6 +94,8 @@ namespace DiscCraft
 
         public static Ray playerRay;
 
+        public static int drawedChunk = 0;
+
 
         public Main()
         {
@@ -277,7 +279,7 @@ namespace DiscCraft
 
             stop.Start();
 
-            GraphicsDevice.Clear(Color.CornflowerBlue);
+            GraphicsDevice.Clear(Color.Black);
 
             basicEffect.Projection = projectionMatrix;
             basicEffect.View = viewMatrix;
@@ -315,8 +317,8 @@ namespace DiscCraft
                 basicEffect.EmissiveColor = new Vector3(0.0f, 0.0f, 0.0f);
                 basicEffect.PreferPerPixelLighting = false;
                 basicEffect.SpecularColor = new Vector3(1, 1, 1);
-                //basicEffect.SpecularPower = 100f;
-                basicEffect.DiffuseColor = new Vector3(1, 1, 1);
+                //basicEffect.SpecularPower = 20f;
+                basicEffect.DiffuseColor = new Vector3(1, 1, 1); //basicEffect.DiffuseColor = new Vector3(0.3f, 0.3f, 0.3f);
                 basicEffect.FogEnabled = true;
                 basicEffect.FogStart = 256f; //80f
                 basicEffect.FogEnd = 306f; //130f
@@ -351,10 +353,6 @@ namespace DiscCraft
 
 
 
-
-
-
-
             int range = 10;
 
             Vector3 cursorOrigine = cameraV2.Position + new Vector3(0, 0, 0); // 1
@@ -367,6 +365,7 @@ namespace DiscCraft
             cursorEnd = Vector3.Transform(new Vector3(0, 0, range), rotationMatrix);
 
             Vector3 selectPos = new Vector3(0, 255, 0);
+            CollisionHelper.BlockFace face = CollisionHelper.BlockFace.None;
 
 
             /*if (Handler.chunks.ContainsKey(new Vect2(0, 0)))
@@ -415,6 +414,7 @@ namespace DiscCraft
 
                             if (c.blocks[(int)bCoord.X, (int)bCoord.Y, (int)bCoord.Z] != null)
                             {
+
                                 CollisionHelper.BlockFace res = CollisionHelper.RayBox(cursorOrigine, cursorOrigine + cursorEnd, v);
 
                                 if (res != CollisionHelper.BlockFace.None)
@@ -422,6 +422,8 @@ namespace DiscCraft
                                     if (selectPos.Y == 255 || Vector3.Distance(selectPos + new Vector3(0.5f, 0.5f, 0.5f), cursorOrigine) > Vector3.Distance(v + new Vector3(0.5f, 0.5f, 0.5f), cursorOrigine))
                                     {
                                         selectPos = v;
+                                        face = res;
+
                                         //Console.WriteLine($"Collision {x};{y};{z} -> {res}");
                                     }
 
@@ -438,15 +440,10 @@ namespace DiscCraft
 
 
 
-            if (MouseInput.getMouseState().LeftButton == ButtonState.Pressed) // && MouseInput.getOldMouseState().LeftButton != ButtonState.Pressed)
+            if (MouseInput.getMouseState().LeftButton == ButtonState.Pressed && MouseInput.getOldMouseState().LeftButton != ButtonState.Pressed)
             {
                 if(selectPos.Y != 255)
                 {
-
-                    /*Handler.chunks[new Vect2(0, 0)].blocks[(int)selectPos.X, (int)selectPos.Y, (int)selectPos.Z] = null;
-
-                    if(!Handler.chunkStack.Contains(new Vect2(0, 0)))
-                        Handler.chunkStack.Add(new Vect2(0, 0));*/
 
                     Chunk c = Handler.GetChunkWithBlockCoord(selectPos);
 
@@ -456,27 +453,60 @@ namespace DiscCraft
                         Vector3 bCoord = Handler.GetBlockCoordInChunk(selectPos);
 
                         c.blocks[(int)bCoord.X, (int)bCoord.Y, (int)bCoord.Z] = null;
-                        
-                        if (!Handler.chunkStack.Contains(c.Position/16))
-                            Handler.chunkStack.Add(c.Position/16);
+
+                        Handler.UpdateChunkVertexTask(c.Position/16, GraphicsDevice);
 
                     }
+                }
+            }
 
+            if (MouseInput.getMouseState().RightButton == ButtonState.Pressed && MouseInput.getOldMouseState().RightButton != ButtonState.Pressed)
+            {
+                if (selectPos.Y != 255)
+                {
+
+                    Chunk c = Handler.GetChunkWithBlockCoord(selectPos);
+
+                    if (c != null)
+                    {
+                        Vector3 a = Vector3.Zero;
+                        if (face == CollisionHelper.BlockFace.Right)
+                            a = new Vector3(1, 0, 0);
+                        else if (face == CollisionHelper.BlockFace.Left)
+                            a = new Vector3(-1, 0, 0);
+                        else if (face == CollisionHelper.BlockFace.Top)
+                            a = new Vector3(0, 1, 0);
+                        else if (face == CollisionHelper.BlockFace.Bottom)
+                            a = new Vector3(0, -1, 0);
+                        else if (face == CollisionHelper.BlockFace.Front)
+                            a = new Vector3(0, 0, -1);
+                        else if (face == CollisionHelper.BlockFace.Back)
+                            a = new Vector3(0, 0, 1);
+
+                        Chunk ca = Handler.GetChunkWithBlockCoord(selectPos + a);
+                        Vector3 bCoord = Handler.GetBlockCoordInChunk(selectPos + a);
+
+                        ca.blocks[(int)bCoord.X, (int)bCoord.Y, (int)bCoord.Z] = new Block(3);
+                        Handler.UpdateChunkVertexTask(c.Position / 16, GraphicsDevice);
+
+
+                    }
                 }
             }
 
 
+            //Console.WriteLine(face);
 
             VertexPositionColor[] vertices = new VertexPositionColor[9];
 
-            vertices[0] = new VertexPositionColor(selectPos + new Vector3(0, 0, 0), Color.Red);
-            vertices[1] = new VertexPositionColor(selectPos + new Vector3(1, 0, 0), Color.Aqua);
-            vertices[2] = new VertexPositionColor(selectPos + new Vector3(0, 1, 0), Color.Yellow);
-            vertices[3] = new VertexPositionColor(selectPos + new Vector3(1, 1, 0), Color.Chartreuse);
-            vertices[4] = new VertexPositionColor(selectPos + new Vector3(0, 0, 1), Color.DarkSlateGray);
-            vertices[5] = new VertexPositionColor(selectPos + new Vector3(1, 0, 1), Color.GhostWhite);
-            vertices[6] = new VertexPositionColor(selectPos + new Vector3(0, 1, 1), Color.LightGreen);
-            vertices[7] = new VertexPositionColor(selectPos + new Vector3(1, 1, 1), Color.RoyalBlue);
+            vertices[0] = new VertexPositionColor(selectPos + new Vector3(-0.01f, -0.01f, -0.01f), Color.Black);
+            vertices[1] = new VertexPositionColor(selectPos + new Vector3(1.01f, -0.01f, -0.01f), Color.Black);
+            vertices[2] = new VertexPositionColor(selectPos + new Vector3(-0.01f, 1.01f, -0.01f), Color.Black);
+            vertices[3] = new VertexPositionColor(selectPos + new Vector3(1.01f, 1.01f, -0.01f), Color.Black);
+            vertices[4] = new VertexPositionColor(selectPos + new Vector3(-0.01f, -0.01f, 1.01f), Color.Black);
+            vertices[5] = new VertexPositionColor(selectPos + new Vector3(1, -0.01f, 1.01f), Color.Black);
+            vertices[6] = new VertexPositionColor(selectPos + new Vector3(-0.01f, 1.01f, 1.01f), Color.Black);
+            vertices[7] = new VertexPositionColor(selectPos + new Vector3(1.01f, 1.01f, 1.01f), Color.Black);
 
             VertexBuffer vertexBuffer;
             IndexBuffer indexBuffer;
@@ -539,6 +569,7 @@ namespace DiscCraft
             GraphicsDevice.SetVertexBuffer(vertexBuffer);
             GraphicsDevice.Indices = indexBuffer;
             basicEffect.TextureEnabled = false;  // make sure this is enabled
+            basicEffect.VertexColorEnabled = true;
 
             foreach (EffectPass pass in basicEffect.CurrentTechnique.Passes)
             {
@@ -568,6 +599,9 @@ namespace DiscCraft
             spriteBatch.DrawString(UltimateFont, "rotation z : " + cameraV2.cameraLookAt.Z, new Vector2(10, 140), Color.White);
 
             spriteBatch.DrawString(UltimateFont, "view origine : " + cameraV2.Position, new Vector2(10, 190), Color.White);
+
+            spriteBatch.DrawString(UltimateFont, "chunk : " + (int)(cameraV2.Position.X / 16) + ":" + (int)(cameraV2.Position.Z / 16), new Vector2(10, 210), Color.White);
+            spriteBatch.DrawString(UltimateFont, "drawed chunk : " + drawedChunk + " : " + Handler.chunkBufferQueue.Count, new Vector2(10, 235), Color.White);
 
 
             MiniMap.Draw(spriteBatch);

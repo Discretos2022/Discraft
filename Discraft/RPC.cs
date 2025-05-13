@@ -39,9 +39,15 @@ namespace Discraft
             //Call this as many times as you want and anywhere in your code.
             client.SetPresence(new RichPresence()
             {
-                
+
                 Details = "Optimisation Graphique ?!",
                 State = "Des Mondes TOUJOURS plus grand !",
+                //Details = "TOUJOURS plus de blocs ?!",
+                //State = "Le caillou...",
+                //Details = "Chunk Generator V2",
+                //State = "Async Engine",
+                //Details = "Création d'un monde...",
+                //State = "un monde sans vie...",
                 /*Party = new Party()
                 {
                     Privacy = Party.PrivacySetting.Public,
