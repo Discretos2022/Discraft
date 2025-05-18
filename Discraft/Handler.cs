@@ -41,11 +41,15 @@ namespace DiscCraft_2
         public static int MAX_TASK = 100;
         public static int tasknum = 0;
 
+        public static Player player;
+
 
         public static void Init(GraphicsDevice gpu)
         {
 
             int num = 0;
+
+            player = new Player(new Vector3(0, 50, 0));
 
             //for (int i = 0; i < chunks.GetLength(0); i++)
             //{
@@ -179,7 +183,7 @@ namespace DiscCraft_2
         public static void Draw(GraphicsDevice gpu, BasicEffect basicEffect, Camera camera)
         {
 
-            viewLength = 3; // 8
+            viewLength = 16; // 8
 
             //for (int i = 0; i < chunks.GetLength(0); i++)
             //{
@@ -252,8 +256,10 @@ namespace DiscCraft_2
         }
 
 
-        public static void Update(GameTime gameTime, GraphicsDevice gpu)
+        public static void Update(GameTime gameTime, Game game)
         {
+
+            player.Update(gameTime, game);
 
             //CheckAsync(gpu);
 
@@ -383,7 +389,7 @@ namespace DiscCraft_2
                 }
 
 
-                //Thread.Sleep(100); // 1000
+                Thread.Sleep(100); // 1000
 
 
             }
@@ -542,7 +548,7 @@ namespace DiscCraft_2
 
                 tasknum -= 1;
 
-            }
+                }
 
             //});
 
@@ -610,10 +616,14 @@ namespace DiscCraft_2
             if (blockCoord.X < 0 && (int)(blockCoord.X / 16) == (blockCoord.X / 16)) chunkCoord.X += 1;
             if (blockCoord.Z < 0 && (int)(blockCoord.Z / 16) == (blockCoord.Z / 16)) chunkCoord.Y += 1;
 
-            if (chunks.ContainsKey(chunkCoord) && blockCoord.Y >= 0 && blockCoord.Y < 64)
-                return chunks[chunkCoord];
-            else 
-                return null;
+            lock (chunks)
+            {
+                if (chunks.ContainsKey(chunkCoord) && blockCoord.Y >= 0 && blockCoord.Y < 64)
+                    return chunks[chunkCoord];
+                else
+                    return null;
+            }
+            
         }
 
         public static Vector3 GetBlockCoordInChunk(Vector3 blockCoord)

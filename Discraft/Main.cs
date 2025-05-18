@@ -257,14 +257,15 @@ namespace DiscCraft
 
             }
 
-            tick += 1;
+            /*tick += 1;
 
             if(tick == 240)
             {
                 Handler.Update(gameTime, GraphicsDevice);
                 tick = 0;
-            }
+            }*/
 
+            Handler.Update(gameTime, this);
 
             base.Update(gameTime);
         }
@@ -353,7 +354,7 @@ namespace DiscCraft
 
 
 
-            int range = 10;
+            int range = 7;
 
             Vector3 cursorOrigine = cameraV2.Position + new Vector3(0, 0, 0); // 1
             Vector3 cursorEnd = new Vector3(range, 0, 0);

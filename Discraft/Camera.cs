@@ -117,7 +117,7 @@ namespace DiscCraft
         public void Update()
         {
 
-            Vector3 moveVector = Vector3.Zero;
+            /*Vector3 moveVector = Vector3.Zero;
 
             if (KeyInput.getKeyState().IsKeyDown(Keys.W))
                 moveVector.Z = 1f;
@@ -153,7 +153,7 @@ namespace DiscCraft
             float deltaX;
             float deltaY;
 
-            if (/*MouseInput.getMouseState() != MouseInput.getOldMouseState() &&*/ Main.cameraActived)
+            if (/*MouseInput.getMouseState() != MouseInput.getOldMouseState() &&* Main.cameraActived)
             {
                 /// Cache mouse location
                 deltaX = (MouseInput.getMouseState().X - game.GraphicsDevice.Viewport.Width / 2);
@@ -186,7 +186,7 @@ namespace DiscCraft
 
             //if(Main.cameraActived)
                 
-
+            */
 
 
         }
