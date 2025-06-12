@@ -51,7 +51,7 @@ namespace Discraft
                 /// Normalize Vector
                 moveVector.Normalize();
 
-                moveVector *= 1;
+                moveVector *= 0.2f;
 
                 /// Move camera
                 Move(new Vector3(moveVector.X, 0, 0));

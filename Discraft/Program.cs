@@ -72,6 +72,12 @@ Rectangle rect = new Rectangle(5,5,2,2);
 
 Console.WriteLine(CollisionHelper.LineRect(start, end, rect));*/
 
+/*var noise = new PerlinNoise(0);
+
+for (int i = 0; i < 256; i++)
+{
+    Console.WriteLine(noise.Noise(i, i));
+}*/
 
 
 using var game = new DiscCraft.Main();

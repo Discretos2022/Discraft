@@ -36,7 +36,7 @@ namespace Discraft
 
         public Texture2D tex = Main.BlockSheet;
 
-        public static uint BUFFERSIZE = 13000;
+        public static uint BUFFERSIZE = 25000; // 13000;
 
         public VertexPositionNormalTexture[] vertex = new VertexPositionNormalTexture[BUFFERSIZE];
         public ushort[] indices = new ushort[BUFFERSIZE];
@@ -186,7 +186,7 @@ namespace Discraft
             /// Back
             GetUVCoords(ref u1, ref v1, ref u2, ref v2, GetSourceRect(type)[5]);
             if (!back) { norm = Vector3.Forward; AddVertex(r, t, f, norm, u2, v2); AddVertex(l, t, f, norm, u1, v2); AddVertex(l, b, f, norm, u1, v1); AddVertex(r, b, f, norm, u2, v1); }
-
+            
 
             ushort offset = 0;
             ushort offset2 = 0;

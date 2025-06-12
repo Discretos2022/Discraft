@@ -197,6 +197,22 @@ namespace DiscCraft_2
             //}
 
 
+            for (int i = 0; i < 10; i++)
+            {
+                if (chunkGraphiqueQueue.Count > 0)
+                {
+                    if (chunkGraphiqueQueue[0].hasVertex)
+                    {
+                        chunkGraphiqueQueue[0].BuildBuffer();
+                        chunkBufferQueue.Add(chunkGraphiqueQueue[0]);
+                        chunkGraphiqueQueue.RemoveAt(0);
+                    }
+
+                }
+            }
+
+
+
             Main.drawedChunk = 0;
             int max = chunkBufferQueue.Count;
             for (int i = 0; i < max; i++)
@@ -370,7 +386,7 @@ namespace DiscCraft_2
                             {
                                 
                                 //for (int h = 0; h < 4; h++)
-                                if (tasknum <= MAX_TASK)
+                                //if (tasknum <= MAX_TASK)
                                     if (chunks[new Vect2(i, j)].loaded[1] == 0)
                                     {
                                         chunks[new Vect2(i, j)].loaded[1] = 1;
@@ -527,6 +543,7 @@ namespace DiscCraft_2
 
 
         public static List<ChunkBuffer> chunkBufferQueue = new List<ChunkBuffer>();
+        public static List<ChunkBuffer> chunkGraphiqueQueue = new List<ChunkBuffer>();
 
 
         public static void GenerateChunkVertexTask(Vect2 chunk, int yCoord, GraphicsDevice gpu)
@@ -539,10 +556,14 @@ namespace DiscCraft_2
                     ChunkBuffer b = new ChunkBuffer(gpu, chunk, h);
 
                     b.BuildVertex(chunks[chunk].blocks);
-                    if (b.hasVertex)
-                        b.BuildBuffer();
+                //if (b.hasVertex)
+                //b.BuildBuffer();
 
-                chunkBufferQueue.Add(b);
+                if (b.hasVertex)
+                    chunkGraphiqueQueue.Add(b);
+                    //chunkBufferQueue.Add(b);
+                //else
+
                 //Console.WriteLine("--> " + chunk.X + ";" + chunk.Y + " | " + b.vertexCount);
                 Main.VERTEX += b.vertexCount;
 
@@ -565,6 +586,7 @@ namespace DiscCraft_2
 
             //Task task = new Task(() => {
 
+            bool exist = false;
             for (int h = 0; h < 4; h++)
             {
                 ChunkBuffer b = new ChunkBuffer(gpu, chunk, h);
@@ -582,7 +604,15 @@ namespace DiscCraft_2
                             {
                                 Main.VERTEX -= chunkBufferQueue[i].vertexCount;
                                 chunkBufferQueue[i] = b;
+                                Main.VERTEX += b.vertexCount;
+                                exist = true;
                             }
+                        }
+
+                        if (!exist)
+                        {
+                            Main.VERTEX += b.vertexCount;
+                            chunkBufferQueue.Add(b);
                         }
 
                     }
@@ -593,6 +623,7 @@ namespace DiscCraft_2
                     tasknum -= 1;
 
                 }
+                exist = false;
             }
 
             //});

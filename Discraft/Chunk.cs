@@ -1,5 +1,6 @@
 ﻿using DiscCraft;
 using DiscCraft_2;
+using Discraft;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
@@ -103,7 +104,7 @@ namespace DiscCraft
             indexBuffer3 = new IndexBuffer(gpu, typeof(ushort), BUFFERSIZE, BufferUsage.WriteOnly);*/
 
 
-            int Height = 30 + (int)(Math.Sin(Position.X/16) * 5) + (int)(Math.Sin(Position.Y / 16) * 5);
+            /*int Height = 30 + (int)(Math.Sin(Position.X/16) * 5) + (int)(Math.Sin(Position.Y / 16) * 5);
 
             if (Math.Abs(Position.X / 16) == 9 || Math.Abs(Position.Y / 16) == 9) Height = 50;
             if (Math.Abs(Position.X / 16) == 10 || Math.Abs(Position.Y / 16) == 10) Height = 50;
@@ -166,8 +167,25 @@ namespace DiscCraft
             if(Position == new Vect2(0, 0))
             {
                 blocks[0, 50, 0] = new Block(3);
+            }*/
+
+
+
+            for (int x = 0; x < blocks.GetLength(0); x++)
+            {
+                for (int y = 0; y < blocks.GetLength(1); y++)
+                {
+                    for (int z = 0; z < blocks.GetLength(2); z++)
+                    {
+                        int id = WorldGenerator.GetBlockID(new Vector3(x + Position.X, y, z + Position.Y));
+                        
+                        if(id >= 0)
+                            blocks[x, y, z] = new Block(id);
+                    }
+                }
             }
-            
+
+
 
             //Console.WriteLine(vertexCount);
 

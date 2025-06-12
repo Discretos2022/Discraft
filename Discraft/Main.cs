@@ -19,6 +19,7 @@ using System.Threading;
  *
  *  💿
  * 
+ *  𝕯𝖎𝖘𝖈𝖗𝖆𝖋𝖙 𝟛.𝟘
  *
 **/
 
@@ -307,7 +308,7 @@ namespace DiscCraft
 
             //Handler.Draw(cameraV2, GraphicsDevice, basicEffect);
 
-            bool lightEnable = true;
+            bool lightEnable = false;
             if (lightEnable) {
                 basicEffect.EnableDefaultLighting();   // make sure lighting is on
                 basicEffect.LightingEnabled = true;

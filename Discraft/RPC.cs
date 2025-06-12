@@ -40,8 +40,11 @@ namespace Discraft
             client.SetPresence(new RichPresence()
             {
 
-                Details = "Optimisation Graphique ?!",
-                State = "Des Mondes TOUJOURS plus grand !",
+                Details = "Dans les étoiles",
+                State = "Explore l'univers",
+
+                //Details = "Optimisation Graphique ?!",
+                //State = "Des Mondes TOUJOURS plus grand !",
                 //Details = "TOUJOURS plus de blocs ?!",
                 //State = "Le caillou...",
                 //Details = "Chunk Generator V2",
@@ -64,9 +67,10 @@ namespace Discraft
                 },
                 Assets = new Assets()
                 {
-                    LargeImageKey = "discraft_icon",
-                    LargeImageText = "𝕯𝖎𝖘𝖈𝖗𝖆𝖋𝖙 𝟛.𝟘",
-                    //SmallImageKey = "discraft_icon"
+                    LargeImageKey = "spacecraft_icon",
+                    LargeImageText = "𝙎𝙥𝙖𝙘𝙚𝙘𝙧𝙖𝙛𝙩™",
+                    SmallImageKey = "discraft_icon",
+                    SmallImageText = "𝕯𝖎𝖘𝖈𝖗𝖆𝖋𝖙 𝟛.𝟘",
                 }
 
             });
