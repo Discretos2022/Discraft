@@ -21,7 +21,7 @@ namespace Discraft
 
             Vector2 position = new Vector2(worldPosition.X, worldPosition.Z);
 
-            int h = (int)(n.Noise(position.X, position.Y) * 50);  // * 60      80
+            int h = (int)(n.Noise(position.X, position.Y) * 200);  // * 60      80
 
 
             //Init();

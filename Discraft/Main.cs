@@ -110,8 +110,8 @@ namespace DiscCraft
             IsFixedTimeStep = true;
 
 
-            graphics.PreferredBackBufferWidth = 1920 / 2;      //(1920/5) * 5;      //500;         640* 360
-            graphics.PreferredBackBufferHeight = 1080 / 2;     //(1080/5) * 5;     //250;
+            graphics.PreferredBackBufferWidth = 1920 / 2;   //2880;      //(1920/5) * 5;      //500;         640* 360
+            graphics.PreferredBackBufferHeight = 1080 / 2;   //1800;     //(1080/5) * 5;     //250;
 
 
             Window.AllowUserResizing = true;    
@@ -233,6 +233,8 @@ namespace DiscCraft
             projectionMatrix = cameraV2.Projection;
             viewMatrix = cameraV2.View;
 
+            Handler.Update(gameTime, this);
+
             cameraV2.Update();
             cameraV2.UpdateLookAt();
 
@@ -266,7 +268,7 @@ namespace DiscCraft
                 tick = 0;
             }*/
 
-            Handler.Update(gameTime, this);
+            
 
             base.Update(gameTime);
         }
@@ -296,11 +298,13 @@ namespace DiscCraft
             //Turn off culling so we see both sides of our rendered triangle
 
             RasterizerState rasterizerState = new RasterizerState();
-            rasterizerState.CullMode = CullMode.None;
+            rasterizerState.CullMode = CullMode.CullCounterClockwiseFace;
             rasterizerState.FillMode = FillMode.Solid;
+            rasterizerState.DepthBias = 0;
+            rasterizerState.SlopeScaleDepthBias = 0;
             GraphicsDevice.RasterizerState = rasterizerState;
 
-            GraphicsDevice.BlendState = BlendState.AlphaBlend;
+            GraphicsDevice.BlendState = BlendState.Opaque;
 
             GraphicsDevice.SamplerStates[0] = SamplerState.PointClamp;
 
@@ -322,7 +326,7 @@ namespace DiscCraft
                 //basicEffect.SpecularPower = 20f;
                 basicEffect.DiffuseColor = new Vector3(1, 1, 1); //basicEffect.DiffuseColor = new Vector3(0.3f, 0.3f, 0.3f);
                 basicEffect.FogEnabled = true;
-                basicEffect.FogStart = 256f; //80f
+                basicEffect.FogStart = 256f; //80f   16 * 16
                 basicEffect.FogEnd = 306f; //130f
                 basicEffect.FogColor = new Vector3(0.3f,0.3f,0.3f);
             }

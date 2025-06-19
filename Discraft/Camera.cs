@@ -23,6 +23,23 @@ namespace DiscCraft
         public float cameraSensibility = 0.002f;
 
 
+        private BoundingFrustum _boundingFrustum;
+        public bool _frustumNeedsUpdate = true;
+
+
+        public BoundingFrustum BoundingFrustum
+        {
+            get
+            {
+                if (_frustumNeedsUpdate)
+                {
+                    UpdateFrustum();
+                }
+                return _boundingFrustum;
+            }
+        }
+
+
         public Vector3 Position
         {
             get { return cameraPosition; }
@@ -61,12 +78,21 @@ namespace DiscCraft
             cameraSpeed = speed;
 
             /// Setup projection matrix
-            Projection = Matrix.CreatePerspectiveFieldOfView(MathHelper.PiOver4, game.GraphicsDevice.Viewport.AspectRatio, 0.05f, 2000);//256.0f); // game.GraphicsDevice.Viewport.AspectRatio
+            Projection = Matrix.CreatePerspectiveFieldOfView(MathHelper.PiOver4, game.GraphicsDevice.Viewport.AspectRatio, 0.1f, 1000);//256.0f); // game.GraphicsDevice.Viewport.AspectRatio    0.05f, 2000
 
             /// Set camera position
             MoveTo(position, rotation);
 
+            /// Init the frustrum
+            _boundingFrustum = new BoundingFrustum(Matrix.Identity);
+            UpdateFrustum();
 
+        }
+
+        private void UpdateFrustum()
+        {
+            _boundingFrustum.Matrix = View * Projection;
+            _frustumNeedsUpdate = false;
         }
 
 
@@ -74,6 +100,7 @@ namespace DiscCraft
         {
             cameraPosition = pos;
             cameraRotation = rot;
+            _frustumNeedsUpdate = true;
         }
 
         /// Update the look at Vector
@@ -88,6 +115,8 @@ namespace DiscCraft
 
             /// Update camera look at vector
             cameraLookAt = cameraPosition + LookAtOffset;
+
+            _frustumNeedsUpdate = true;
 
         }
 
@@ -188,10 +217,19 @@ namespace DiscCraft
                 
             */
 
+            
+            if (_frustumNeedsUpdate)
+            {
+                UpdateFrustum();
+            }
 
         }
 
-
+        
+        public bool IsChunkVisible(BoundingBox chunkBounds)
+        {
+            return BoundingFrustum.Intersects(chunkBounds);
+        }
 
 
     }

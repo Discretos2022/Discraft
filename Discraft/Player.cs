@@ -109,6 +109,7 @@ namespace Discraft
         {
             Position = pos;
             Rotation = rot;
+            Main.cameraV2._frustumNeedsUpdate = true;
         }
 
 

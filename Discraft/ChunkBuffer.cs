@@ -165,7 +165,7 @@ namespace Discraft
 
             /// Down
             GetUVCoords(ref u1, ref v1, ref u2, ref v2, GetSourceRect(type)[0]);
-            if (!down) { norm = Vector3.Up; AddVertex(l, t, f, norm, u1, v1); AddVertex(r, t, f, norm, u2, v1); AddVertex(r, t, n, norm, u2, v2); AddVertex(l, t, n, norm, u1, v2); } // (left,y,far),(right,y,far),(right,y,near) [clockwise]
+            if (!down) { norm = Vector3.Down; AddVertex(l, t, f, norm, u1, v1); AddVertex(r, t, f, norm, u2, v1); AddVertex(r, t, n, norm, u2, v2); AddVertex(l, t, n, norm, u1, v2); } // (left,y,far),(right,y,far),(right,y,near) [clockwise]
 
             /// Left
             GetUVCoords(ref u1, ref v1, ref u2, ref v2, GetSourceRect(type)[1]);
@@ -181,11 +181,11 @@ namespace Discraft
 
             /// Front
             GetUVCoords(ref u1, ref v1, ref u2, ref v2, GetSourceRect(type)[4]);
-            if (!front) { norm = Vector3.Backward; AddVertex(l, t, n, norm, u2, v2); AddVertex(r, t, n, norm, u1, v2); AddVertex(r, b, n, norm, u1, v1); AddVertex(l, b, n, norm, u2, v1); }
+            if (!front) { norm = Vector3.Forward; AddVertex(l, t, n, norm, u2, v2); AddVertex(r, t, n, norm, u1, v2); AddVertex(r, b, n, norm, u1, v1); AddVertex(l, b, n, norm, u2, v1); }
 
             /// Back
             GetUVCoords(ref u1, ref v1, ref u2, ref v2, GetSourceRect(type)[5]);
-            if (!back) { norm = Vector3.Forward; AddVertex(r, t, f, norm, u2, v2); AddVertex(l, t, f, norm, u1, v2); AddVertex(l, b, f, norm, u1, v1); AddVertex(r, b, f, norm, u2, v1); }
+            if (!back) { norm = Vector3.Backward; AddVertex(r, t, f, norm, u2, v2); AddVertex(l, t, f, norm, u1, v2); AddVertex(l, b, f, norm, u1, v1); AddVertex(r, b, f, norm, u2, v1); }
             
 
             ushort offset = 0;
@@ -203,7 +203,7 @@ namespace Discraft
             if (down) offset += 4;
 
             /// LEFT
-            if (!left) { AddTriangle((ushort)(5 - offset), (ushort)(7 - offset), (ushort)(6 - offset), offset2); triangle_count[VertexIndex]++; AddTriangle((ushort)(7 - offset), (ushort)(6 - offset), (ushort)(4 - offset), offset2); triangle_count[VertexIndex]++; }  // clockwise order
+            if (!left) { AddTriangle((ushort)(5 - offset), (ushort)(7 - offset), (ushort)(6 - offset), offset2); triangle_count[VertexIndex]++; AddTriangle((ushort)(6 - offset), (ushort)(7 - offset), (ushort)(4 - offset), offset2); triangle_count[VertexIndex]++; }  // clockwise order
             if (left) offset += 4;
 
             /// UP

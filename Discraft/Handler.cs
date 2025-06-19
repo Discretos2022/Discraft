@@ -84,7 +84,7 @@ namespace DiscCraft_2
             //    }
             //}
 
-            int worldSize = 16; // 64
+            int worldSize = 8; // 64
 
 
             /*for (int i = 0; i < worldSize; i++)
@@ -217,11 +217,32 @@ namespace DiscCraft_2
             int max = chunkBufferQueue.Count;
             for (int i = 0; i < max; i++)
             {
-                if (chunkBufferQueue[i].hasVertex)
-                {
-                    chunkBufferQueue[i].Draw(basicEffect);
-                    Main.drawedChunk += 1;
-                }
+
+                ChunkBuffer chunk = chunkBufferQueue[i];
+
+                if (!chunk.hasVertex)
+                    continue;
+
+                float CHUNK_SIZE = 16f;
+
+                Vector3 chunkWorldPos = new Vector3(
+                    chunk.Position.X * CHUNK_SIZE,
+                    chunk.yCoord * CHUNK_SIZE,
+                    chunk.Position.Y * CHUNK_SIZE
+                );
+
+                
+                BoundingBox chunkBounds = new BoundingBox(
+                    chunkWorldPos,
+                    chunkWorldPos + new Vector3(CHUNK_SIZE, CHUNK_SIZE, CHUNK_SIZE)
+                );
+
+
+                if (!camera.IsChunkVisible(chunkBounds) || Vector3.DistanceSquared(chunkWorldPos, Main.cameraV2.Position) > (16 * 24)*(16 * 24))
+                    continue;
+
+                chunkBufferQueue[i].Draw(basicEffect);
+                Main.drawedChunk += 1;
             }
 
 
@@ -405,7 +426,7 @@ namespace DiscCraft_2
                 }
 
 
-                Thread.Sleep(100); // 1000
+                Thread.Sleep(10000); // 1000
 
 
             }
@@ -551,7 +572,7 @@ namespace DiscCraft_2
 
             //Task task = new Task(() => {
 
-                for (int h = 0; h < 4; h++)
+                for (int h = 0; h < 4*4; h++)
                 {
                     ChunkBuffer b = new ChunkBuffer(gpu, chunk, h);
 

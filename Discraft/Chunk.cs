@@ -82,7 +82,7 @@ namespace DiscCraft
 
             Position = _position;
 
-            blocks = new Block[16, 64, 16]; //new Block[16, 64, 16];
+            blocks = new Block[16, 256, 16]; //new Block[16, 64, 16];
 
             //Pos = Position;
 
