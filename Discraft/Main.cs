@@ -27,13 +27,11 @@ namespace DiscCraft
 {
     public class Main : Game
     {
-        public static long vertexNum = 0;
 
         private GraphicsDeviceManager graphics;
         private SpriteBatch spriteBatch;
 
         //Camera
-        Vector3 camTarget;
         Matrix projectionMatrix;
         Matrix viewMatrix;
         Matrix worldMatrix;
@@ -46,18 +44,10 @@ namespace DiscCraft
         public static bool cameraActived = true;
 
         public static Texture2D Cursor;
-
-        public static Texture2D GrassSide;
-        public static Texture2D GrassUp;
-        public static Texture2D GrassDown;
-
         public static Texture2D BlockSheet;
-
         public static Texture2D Bounds;
         public static Texture2D Circle;
 
-        public static Vector2 cp;
-        public static Vector2 cn;
 
         public static SpriteFont UltimateFont = null;      //= new SpriteFont(null, null, null, null, 0, 0, null, null);
         Texture2D SuperFont;
@@ -69,26 +59,7 @@ namespace DiscCraft
 
         Stopwatch stop = new Stopwatch();
 
-
-        //public Block block;
-
-        public Chunk chunk;
-        public Chunk chunk2;
-        public Chunk chunk3;
-        public Chunk chunk4;
-
-        public Chunk chunk5;
-        public Chunk chunk6;
-        public Chunk chunk7;
-        public Chunk chunk8;
-
-        public int tick = 0;
-
-
-
         public static int VERTEX = 0;
-        public static int TRIANGLES = 0;
-
 
         public Stopwatch FpsTime;
         public float fpsTime;
@@ -127,7 +98,6 @@ namespace DiscCraft
 
             cameraV2 = new Camera(this, new Vector3(0,40,0), new Vector3(0,0,0), 0.2f); // 0.5f
 
-
             //Setup Camera
             worldMatrix = Matrix.CreateWorld(new Vector3(0, 0, 0), Vector3.Forward, Vector3.Up);
 
@@ -152,33 +122,9 @@ namespace DiscCraft
         {
             spriteBatch = new SpriteBatch(GraphicsDevice);
 
-            GrassSide = Content.Load<Texture2D>("Images\\Tile_1");
-            GrassUp = Content.Load<Texture2D>("Images\\Tile_2");
-            GrassDown = Content.Load<Texture2D>("Images\\Tile_3");
-
-            //BlockSheet = Content.Load<Texture2D>("Images\\Block_1");
-
             BlockSheet = Content.Load<Texture2D>("Images\\BlockSheet");
 
-            //block = new Block(new Vector3(0,0,0), GraphicsDevice, new Vector3(1,1,1));
-
-            //chunk  = new Chunk(new Vector2(-1, -1), GraphicsDevice);
-            //chunk2 = new Chunk(new Vector2(-1, 0), GraphicsDevice);
-            //chunk3 = new Chunk(new Vector2(0, -1), GraphicsDevice);
-            //chunk4 = new Chunk(new Vector2(0, 0), GraphicsDevice);
-
-            //chunk5 = new Chunk(new Vector2(2, 2), GraphicsDevice);
-            //chunk6 = new Chunk(new Vector2(-3, 2), GraphicsDevice);
-            //chunk7 = new Chunk(new Vector2(2, -3), GraphicsDevice);
-            //chunk8 = new Chunk(new Vector2(-3, -3), GraphicsDevice);
-
-
             Handler.Init(GraphicsDevice);
-            //SerializeNow(Handler.GetChunk(new Vect2(0, 0)));
-
-            //ChunkLoader.SaveChunkAsync(new Vect2(0, 0));
-            //ChunkLoader.SaveChunk2(new Vect2(0, 0));
-
 
             Cursor = Content.Load<Texture2D>("Images\\Cursor");
 
@@ -197,11 +143,6 @@ namespace DiscCraft
 
             KeyInput.Update();
             MouseInput.Update();
-
-
-            //Console.WriteLine("Vertex : " + vertexNum);
-
-            //Console.WriteLine("CAMERA ROT : " + cameraV2.Rotation);
 
             if(KeyInput.getKeyState().IsKeyDown(Keys.P) && !KeyInput.getOldKeyState().IsKeyDown(Keys.P))
             {
@@ -241,35 +182,6 @@ namespace DiscCraft
             projectionMatrix = cameraV2.Projection;
             viewMatrix = cameraV2.View;
 
-
-            if (KeyInput.getKeyState().IsKeyDown(Keys.F5) && !KeyInput.getOldKeyState().IsKeyDown(Keys.F5))
-            {
-
-                for (int i = 0; i < Handler.chunks.Count; i++)
-                {
-
-                    //Vector2 point = (new Vector2(Main.cameraV2.cameraLookAt.X, Main.cameraV2.cameraLookAt.Z) - new Vector2(Main.cameraV2.Position.X, Main.cameraV2.Position.Z)) * 120 + new Vector2(Main.cameraV2.Position.X, Main.cameraV2.Position.Z);
-
-                    KeyValuePair<Vect2, Chunk> chunk = Handler.chunks.ElementAt(i);
-
-                    ChunkLoader.SaveChunk(chunk.Key);
-                    Console.WriteLine(i);
-
-
-                }
-
-            }
-
-            /*tick += 1;
-
-            if(tick == 240)
-            {
-                Handler.Update(gameTime, GraphicsDevice);
-                tick = 0;
-            }*/
-
-            
-
             base.Update(gameTime);
         }
 
@@ -288,14 +200,8 @@ namespace DiscCraft
             basicEffect.Projection = projectionMatrix;
             basicEffect.View = viewMatrix;
             basicEffect.World = worldMatrix;
-
-
-            //GraphicsDevice.SetVertexBuffer(vertexBuffer);
-
             basicEffect.TextureEnabled = true;
 
-
-            //Turn off culling so we see both sides of our rendered triangle
 
             RasterizerState rasterizerState = new RasterizerState();
             rasterizerState.CullMode = CullMode.CullCounterClockwiseFace;
@@ -303,14 +209,10 @@ namespace DiscCraft
             rasterizerState.DepthBias = 0;
             rasterizerState.SlopeScaleDepthBias = 0;
             GraphicsDevice.RasterizerState = rasterizerState;
-
             GraphicsDevice.BlendState = BlendState.Opaque;
-
             GraphicsDevice.SamplerStates[0] = SamplerState.PointClamp;
-
             GraphicsDevice.DepthStencilState = DepthStencilState.Default;
 
-            //Handler.Draw(cameraV2, GraphicsDevice, basicEffect);
 
             bool lightEnable = true;
             if (lightEnable) {
@@ -337,26 +239,8 @@ namespace DiscCraft
 
             basicEffect.VertexColorEnabled = false;
 
-            //if(Handler.chunks.ContainsKey(new Vector2(0, 0)))
-                //Console.WriteLine(Handler.chunks[new Vector2(0, 0)].vertexCount);
-
-            //if(Vector2.Distance(chunk.Position, new Vector2(cameraV2.Position.X, cameraV2.Position.Y)) < 100)
-            //chunk.Draw(GraphicsDevice, basicEffect);
-            //chunk2.Draw(GraphicsDevice, basicEffect);
-            //chunk3.Draw(GraphicsDevice, basicEffect);
-            //chunk4.Draw(GraphicsDevice, basicEffect);
-
-            //chunk5.Draw(GraphicsDevice, basicEffect);
-            //chunk6.Draw(GraphicsDevice, basicEffect);
-            //chunk7.Draw(GraphicsDevice, basicEffect);
-            //chunk8.Draw(GraphicsDevice, basicEffect);
-
-
-
 
             Handler.Draw(GraphicsDevice, basicEffect, cameraV2);
-
-
 
 
             int range = 7;
@@ -372,35 +256,6 @@ namespace DiscCraft
 
             Vector3 selectPos = new Vector3(0, 1024, 0);
             CollisionHelper.BlockFace face = CollisionHelper.BlockFace.None;
-
-
-            /*if (Handler.chunks.ContainsKey(new Vect2(0, 0)))
-            {
-
-                for (int x = 0; x < Handler.chunks[new Vect2(0, 0)].blocks.GetLength(0); x++)
-                    for (int y = 0; y < Handler.chunks[new Vect2(0, 0)].blocks.GetLength(1); y++)
-                        for (int z = 0; z < Handler.chunks[new Vect2(0, 0)].blocks.GetLength(2); z++)
-                        {
-                            if(Handler.chunks[new Vect2(0, 0)].blocks[x, y, z] != null)
-                            {
-                                CollisionHelper.BlockFace res = CollisionHelper.RayBox(cursorOrigine, cursorOrigine + cursorEnd, new Vector3(x, y, z));
-
-                                if (res != CollisionHelper.BlockFace.None)
-                                {
-                                    if (selectPos.Y == 255 || Vector3.Distance(selectPos + new Vector3(0.5f, 0.5f, 0.5f), cursorOrigine) > Vector3.Distance(new Vector3(x, y, z) + new Vector3(0.5f, 0.5f, 0.5f), cursorOrigine))
-                                    {
-                                        selectPos = new Vector3(x, y, z);
-                                        //Console.WriteLine($"Collision {x};{y};{z} -> {res}");
-                                    }
-                                    
-                                }
-                            }
-                            
-
-                        }
-
-            }*/
-
 
 
             for (int x = (int)cursorOrigine.X - range; x < (int)cursorOrigine.X + range; x++)
@@ -428,40 +283,9 @@ namespace DiscCraft
 
                             }
                         }
-
-
-                        /*Chunk c = Handler.GetChunkWithBlockCoord(v);
-
-                        if (c != null)
-                        {
-
-                            Vector3 bCoord = Handler.GetBlockCoordInChunk(v);
-
-                            if (c.blocks[(int)bCoord.X, (int)bCoord.Y, (int)bCoord.Z] != null)
-                            {
-
-                                CollisionHelper.BlockFace res = CollisionHelper.RayBox(cursorOrigine, cursorOrigine + cursorEnd, v);
-
-                                if (res != CollisionHelper.BlockFace.None)
-                                {
-                                    if (selectPos.Y == 255 || Vector3.Distance(selectPos + new Vector3(0.5f, 0.5f, 0.5f), cursorOrigine) > Vector3.Distance(v + new Vector3(0.5f, 0.5f, 0.5f), cursorOrigine))
-                                    {
-                                        selectPos = v;
-                                        face = res;
-
-                                        //Console.WriteLine($"Collision {x};{y};{z} -> {res}");
-                                    }
-
-                                }
-                            }
-
-                        }*/
-
                     }
                 }
             }
-
-
 
 
 
@@ -469,7 +293,6 @@ namespace DiscCraft
             {
                 if(selectPos.Y != 1024)
                 {
-
 
                     Handler.SetBlock(selectPos, 0);
 
@@ -482,18 +305,6 @@ namespace DiscCraft
                     Handler.UpdateSubChunk(Handler.GetSubchunkKeyWithBlockCoord(selectPos + new Vector3(0, 0, 1)));
                     Handler.UpdateSubChunk(Handler.GetSubchunkKeyWithBlockCoord(selectPos + new Vector3(0, 0, -1)));
 
-                    /*Chunk c = Handler.GetChunkWithBlockCoord(selectPos);
-
-                    if (c != null)
-                    {
-
-                        Vector3 bCoord = Handler.GetBlockCoordInChunk(selectPos);
-
-                        c.blocks[(int)bCoord.X, (int)bCoord.Y, (int)bCoord.Z] = null;
-
-                        Handler.UpdateChunkVertexTask(c.Position/16, GraphicsDevice);
-
-                    }*/
                 }
             }
 
@@ -502,10 +313,6 @@ namespace DiscCraft
                 if (selectPos.Y != 1024)
                 {
 
-                    //Chunk c = Handler.GetChunkWithBlockCoord(selectPos);
-
-                    //if (c != null)
-                    //{
                     Vector3 a = Vector3.Zero;
                     if (face == CollisionHelper.BlockFace.Right)
                         a = new Vector3(1, 0, 0);
@@ -531,19 +338,9 @@ namespace DiscCraft
                     Handler.UpdateSubChunk(Handler.GetSubchunkKeyWithBlockCoord(selectPos + new Vector3(0, 0, 1)));
                     Handler.UpdateSubChunk(Handler.GetSubchunkKeyWithBlockCoord(selectPos + new Vector3(0, 0, -1)));
 
-                    /*Chunk ca = Handler.GetChunkWithBlockCoord(selectPos + a);
-                    Vector3 bCoord = Handler.GetBlockCoordInChunk(selectPos + a);
-
-                    ca.blocks[(int)bCoord.X, (int)bCoord.Y, (int)bCoord.Z] = new Block(3);
-                    Handler.UpdateChunkVertexTask(c.Position / 16, GraphicsDevice);*/
-
-
-                    //}
                 }
             }
 
-
-            //Console.WriteLine(face);
 
             VertexPositionColor[] vertices = new VertexPositionColor[9];
 
@@ -616,7 +413,7 @@ namespace DiscCraft
 
             GraphicsDevice.SetVertexBuffer(vertexBuffer);
             GraphicsDevice.Indices = indexBuffer;
-            basicEffect.TextureEnabled = false;  // make sure this is enabled
+            basicEffect.TextureEnabled = false;
             basicEffect.VertexColorEnabled = true;
 
             foreach (EffectPass pass in basicEffect.CurrentTechnique.Passes)
@@ -625,15 +422,6 @@ namespace DiscCraft
                 GraphicsDevice.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, 12);
             }
 
-
-
-
-
-
-
-            //Block b = new Block(new Vector3(0, 0, 0), 4) + new Block(Vector3.One, 8);
-
-            //Console.WriteLine(b.ToString());
 
 
             spriteBatch.Begin(samplerState: SamplerState.PointClamp);
@@ -649,11 +437,9 @@ namespace DiscCraft
             spriteBatch.DrawString(UltimateFont, "view origine : " + cameraV2.Position, new Vector2(10, 190), Color.White);
 
             spriteBatch.DrawString(UltimateFont, "chunk : " + (int)(cameraV2.Position.X / 16) + ":" + (int)(cameraV2.Position.Z / 16), new Vector2(10, 210), Color.White);
-            spriteBatch.DrawString(UltimateFont, "drawed chunk : " + drawedChunk + " : " + Handler.chunkBufferQueue.Count, new Vector2(10, 235), Color.White);
-
+            spriteBatch.DrawString(UltimateFont, "drawed chunk : " + drawedChunk + " : " + Handler.chunks2.Count * 16, new Vector2(10, 235), Color.White);
 
             MiniMap.Draw(spriteBatch);
-
 
             Process process = Process.GetCurrentProcess();
             //Console.WriteLine(process.NonpagedSystemMemorySize64);
@@ -661,24 +447,13 @@ namespace DiscCraft
             //Console.WriteLine(process.PagedMemorySize64);
 
             spriteBatch.DrawString(UltimateFont, "memory : " + (((int)process.WorkingSet64 / 8) / 1024 / 1024), new Vector2(10, 260), Color.White);
-            
-            
             spriteBatch.DrawString(UltimateFont, "vertex : " + VERTEX, new Vector2(10, 300), Color.White);
-            spriteBatch.DrawString(UltimateFont, "triangle : " + TRIANGLES, new Vector2(10, 320), Color.White);
-
             spriteBatch.DrawString(UltimateFont, "fps : " + Math.Round(1.0f / (fpsTime / 1000)), new Vector2(10, 400), Color.White);
-
-
-            //spriteBatch.DrawString(UltimateFont, "ready to update : " + Handler.chunkStack.Count, new Vector2(10, 500), Color.White);
             spriteBatch.DrawString(UltimateFont, "loaded chunks   : " + Handler.chunks2.Count, new Vector2(10, 520), Color.White);
-
-
-
 
             spriteBatch.Draw(Cursor, new Vector2(GraphicsDevice.Viewport.Width / 2 - 16 / 2, GraphicsDevice.Viewport.Height / 2 - 16 / 2), Color.White);
 
             spriteBatch.End();
-
 
 
             stop.Stop();
@@ -690,199 +465,6 @@ namespace DiscCraft
             base.Draw(gameTime);
         }
 
-        public static bool RayVsRect(Ray ray, BoundingBox box)
-        {
-
-            float t0x = (box.Min.X - ray.Position.X) / ray.Direction.X;
-            float t0y = (box.Min.Y - ray.Position.Y) / ray.Direction.Y;
-            float tmin = (t0x > t0y) ? t0x : t0y;
-
-            float t1x = (box.Max.X - ray.Position.X) / ray.Direction.X;
-            float t1y = (box.Max.Y - ray.Position.Y) / ray.Direction.Y;
-            float tmax = (t1x < t1y) ? t1x : t1y;
-
-            if (t0x > t1y || t0y > t1x) return false;
-
-            float t0z = (box.Min.Z - ray.Position.Z) / ray.Direction.Z;
-            float t1z = (box.Max.Z - ray.Position.Z) / ray.Direction.Z;
-            if (tmin > t1z || t0z > tmax)
-                return false;
-            if (t0z > tmin) tmin = t0z;
-            if (t1z < tmax) tmax = t1z;
-
-            return true;
-
-        }
-
-        public static bool RayVsRect2(Vector2 ray_origin, Vector2 ray_dir, Rectangle target, Vector2 contact_point, Vector2 contact_normal, float t_hit_near, SpriteBatch _spriteBatch)
-        {
-            
-                Vector2 t_near = (new Vector2(target.X, target.Y) - ray_origin) / ray_dir;
-                Vector2 t_far = (new Vector2(target.X, target.Y) + new Vector2(target.Width, target.Height) - ray_origin) / ray_dir;
-
-                //if (t_near.X > t_far.X) throw new ArgumentOutOfRangeException("ERROR");
-                //if (t_near.Y > t_far.Y) throw new ArgumentOutOfRangeException("ERROR");
-
-
-                if (t_near.X > t_far.Y || t_near.Y > t_far.X) return false;
-
-                t_hit_near = Math.Max(t_near.X, t_near.Y);
-                float t_hit_far = Math.Min(t_far.X, t_far.Y);
-
-                if (t_hit_far < 0) return false;
-
-
-                contact_point = ray_origin + t_hit_near * ray_dir;
-
-                if (t_near.X > t_near.Y)
-                    if (ray_dir.X < 0)
-                        contact_normal = new Vector2(1, 0);
-                    else
-                        contact_normal = new Vector2(-1, 0);
-                else if (t_near.X < t_near.Y)
-                    if (ray_dir.Y < 0)
-                        contact_normal = new Vector2(0, 1);
-                    else
-                        contact_normal = new Vector2(0, -1);
-
-
-                if (t_hit_near >= 1.0f)
-                    return false;
-
-                cp = contact_point;
-                cn = contact_normal;
-
-                return true;
-
-        }
-
-        bool lineLine(float x1, float y1, float x2, float y2, float x3, float y3, float x4, float y4)
-        {
-
-            // calculate the distance to intersection point
-            float uA = ((x4 - x3) * (y1 - y3) - (y4 - y3) * (x1 - x3)) / ((y4 - y3) * (x2 - x1) - (x4 - x3) * (y2 - y1));
-            float uB = ((x2 - x1) * (y1 - y3) - (y2 - y1) * (x1 - x3)) / ((y4 - y3) * (x2 - x1) - (x4 - x3) * (y2 - y1));
-
-            // if uA and uB are between 0-1, lines are colliding
-            if (uA >= 0 && uA <= 1 && uB >= 0 && uB <= 1)
-            {
-
-                // optionally, draw a circle where the lines meet
-                float intersectionX = x1 + (uA * (x2 - x1));
-                float intersectionY = y1 + (uA * (y2 - y1));
-
-                cp.X = intersectionX;
-                cp.Y = intersectionY;
-
-                return true;
-            }
-            return false;
-        }
-
-
-        public static bool RayIntersectsBox(Ray ray, BoundingBox box, out float distance)
-        {
-            //Source: Real-Time Collision Detection by Christer Ericson
-            //Reference: Page 179
-
-            distance = 0f;
-            float tmax = float.MaxValue;
-
-            if (ray.Direction.X == 0)
-            {
-                if (ray.Position.X < box.Min.X || ray.Position.X > box.Max.X)
-                {
-                    distance = 0f;
-                    return false;
-                }
-            }
-            else
-            {
-                float inverse = 1.0f / ray.Direction.X;
-                float t1 = (box.Min.X - ray.Position.X) * inverse;
-                float t2 = (box.Max.X - ray.Position.X) * inverse;
-
-                if (t1 > t2)
-                {
-                    float temp = t1;
-                    t1 = t2;
-                    t2 = temp;
-                }
-
-                distance = Math.Max(t1, distance);
-                tmax = Math.Min(t2, tmax);
-
-                if (distance > tmax)
-                {
-                    distance = 0f;
-                    return false;
-                }
-            }
-
-            if (ray.Direction.Y == 0)
-            {
-                if (ray.Position.Y < box.Min.Y || ray.Position.Y > box.Max.Y)
-                {
-                    distance = 0f;
-                    return false;
-                }
-            }
-            else
-            {
-                float inverse = 1.0f / ray.Direction.Y;
-                float t1 = (box.Min.Y - ray.Position.Y) * inverse;
-                float t2 = (box.Max.Y - ray.Position.Y) * inverse;
-
-                if (t1 > t2)
-                {
-                    float temp = t1;
-                    t1 = t2;
-                    t2 = temp;
-                }
-
-                distance = Math.Max(t1, distance);
-                tmax = Math.Min(t2, tmax);
-
-                if (distance > tmax)
-                {
-                    distance = 0f;
-                    return false;
-                }
-            }
-
-            if (ray.Direction.Z == 0)
-            {
-                if (ray.Position.Z < box.Min.Z || ray.Position.Z > box.Max.Z)
-                {
-                    distance = 0f;
-                    return false;
-                }
-            }
-            else
-            {
-                float inverse = 1.0f / ray.Direction.Z;
-                float t1 = (box.Min.Z - ray.Position.Z) * inverse;
-                float t2 = (box.Max.Z - ray.Position.Z) * inverse;
-
-                if (t1 > t2)
-                {
-                    float temp = t1;
-                    t1 = t2;
-                    t2 = temp;
-                }
-
-                distance = Math.Max(t1, distance);
-                tmax = Math.Min(t2, tmax);
-
-                if (distance > tmax)
-                {
-                    distance = 0f;
-                    return false;
-                }
-            }
-
-            return true;
-        }
 
         public void InitFont()
         {
@@ -1133,95 +715,6 @@ namespace DiscCraft
 
 
         }
-
-
-        public bool RayIntersectBox2DResolution(Vector3 rayO, Vector3 rayE, BoundingBox box)
-        {
-
-            bool isCollidedDown = false;
-            bool isCollidedRight = false;
-            bool isCollidedBehind = false;
-
-
-            ///Resolution Plan Du Bas
-            if (lineLine(rayO.X, rayO.Z, rayE.X, rayE.Z, box.Min.X, box.Min.Z, box.Max.X, box.Min.Z) ||
-                lineLine(rayO.X, rayO.Z, rayE.X, rayE.Z, box.Max.X, box.Min.Z, box.Max.X, box.Max.Z))
-                isCollidedDown = true;
-
-
-            ///Resolution Plan Du Coté
-            if (lineLine(rayO.Y, rayO.Z, rayE.Y, rayE.Z, box.Min.Y, box.Min.Z, box.Max.Y, box.Min.Z))
-                isCollidedRight = true;
-
-
-            ///Resolution Plan De Derriere
-            if (lineLine(rayO.Y, rayO.Z, rayE.Y, rayE.Z, box.Min.Y, box.Min.Z, box.Max.Y, box.Min.Z))
-                isCollidedBehind = true;
-
-
-            if (isCollidedDown && isCollidedRight)
-                return true;
-
-
-            return false;
-
-
-        }
-
-
-        public Ray CalculateCursorRay(Matrix projectionMatrix, Matrix viewMatrix)
-        {
-            // create 2 positions in screenspace using the cursor position. 0 is as
-            // close as possible to the camera, 1 is as far away as possible.
-            Vector3 nearSource = new Vector3(MouseInput.GetPos(), 0f);
-            Vector3 farSource = new Vector3(MouseInput.GetPos(), 4f);
-
-            // use Viewport.Unproject to tell what those two screen space positions
-            // would be in world space. we'll need the projection matrix and view
-            // matrix, which we have saved as member variables. We also need a world
-            // matrix, which can just be identity.
-            Vector3 nearPoint = GraphicsDevice.Viewport.Unproject(nearSource,
-                projectionMatrix, viewMatrix, Matrix.Identity);
-
-            Vector3 farPoint = GraphicsDevice.Viewport.Unproject(farSource,
-                projectionMatrix, viewMatrix, Matrix.Identity);
-
-            // find the direction vector that goes from the nearPoint to the farPoint
-            // and normalize it....
-            Vector3 direction = farPoint - nearPoint;
-            direction.Normalize();
-
-            // and then create a new ray using nearPoint as the source.
-            return new Ray(nearPoint, direction);
-        }
-
-        private Vector3 cursorRayToCoords(Ray ray, Vector3 cameraPos)
-        {
-            Nullable<float> distance = ray.Intersects(new Plane(Vector3.Up, 0.0f));
-            if (distance == null)
-                return Vector3.Zero;
-            else
-            {
-                return cameraPos + ray.Direction * (float)distance;
-            }
-        }
-
-
-
-        public void SerializeNow(Chunk chunk)
-        {
-            Chunk c = chunk;
-
-            Stream s = new FileStream("Test.txt", FileMode.OpenOrCreate, FileAccess.Write);
-            BinaryFormatter b = new BinaryFormatter();
-            b.Serialize(s, c);
-            s.Close();
-        }
-        public void DeSerializeNow()
-        {
-
-        }
-
 
     }
 }

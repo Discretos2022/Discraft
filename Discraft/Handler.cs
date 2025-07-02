@@ -13,30 +13,14 @@ using System.Threading.Tasks;
 namespace DiscCraft_2
 {
 
-    /// <summary>
-    /// WORLD : 32x32
-    /// no optimisation : 18 874 368 vertex
-    /// optimisation 1 :   2 883 584 vertex
-    /// optimisation 2 :   2 121 728 vertex 
-    /// optimisation 3 :   2 097 152 vertex     (Si le tronçon adjacent est null)
-    /// </summary>
-
     public static class Handler
     {
-        /// 
-        ///  
-
-        //public static Chunk[,] chunks = new Chunk[1, 1];
-
-
-        public static Dictionary<Vect2, Chunk> chunks = new Dictionary<Vect2, Chunk>();
 
         public static ConcurrentDictionary<Vect2, ChunkV2> chunks2 = new ConcurrentDictionary<Vect2, ChunkV2>();
         public static List<Vect2> queue2 = new List<Vect2>();
 
         public static ConcurrentDictionary<(Vect2, int), byte> updateVertexQueue = new ConcurrentDictionary<(Vect2, int), byte>();
         public static ConcurrentDictionary<(Vect2, int), byte> updateBufferQueue = new ConcurrentDictionary<(Vect2, int), byte>();
-
 
         public static Thread chunkLoader;
         public static Thread chunkVertexBuilder;
@@ -62,12 +46,6 @@ namespace DiscCraft_2
 
             int worldSize = 8; // 64
 
-
-            /*
-            Console.Clear();
-            Console.WriteLine("Loading : 100%");
-            Console.WriteLine("[==========]");*/
-
             chunkLoader = new Thread(() => LoadChunkTask(gpu));
             chunkLoader.Priority = ThreadPriority.Normal;
             chunkLoader.Start();
@@ -84,14 +62,6 @@ namespace DiscCraft_2
             chunkUpdater.Priority = ThreadPriority.Normal;
             chunkUpdater.Start();
 
-            /*chunkUnloader = new Thread(() => UnloadChunk());
-            chunkUnloader.Priority = ThreadPriority.Lowest;
-            chunkUnloader.Start();*/
-
-            /*chunkUpdater = new Thread(() => UpdateChunk());
-            chunkUpdater.Priority = ThreadPriority.Lowest;
-            chunkUpdater.Start();*/
-
         }
 
 
@@ -99,57 +69,6 @@ namespace DiscCraft_2
         {
 
             viewLength = 10; // 8
-
-
-            /*for (int i = 0; i < 10; i++)
-            {
-                if (chunkGraphiqueQueue.Count > 0)
-                {
-                    if (chunkGraphiqueQueue[0].hasVertex)
-                    {
-                        chunkGraphiqueQueue[0].BuildBuffer();
-                        chunkBufferQueue.Add(chunkGraphiqueQueue[0]);
-                        chunkGraphiqueQueue.RemoveAt(0);
-                    }
-
-                }
-            }*/
-
-
-            /*Main.drawedChunk = 0;
-            int max = chunkBufferQueue.Count;
-            for (int i = 0; i < max; i++)
-            {
-
-                ChunkBuffer chunk = chunkBufferQueue[i];
-
-                if (!chunk.hasVertex)
-                    continue;
-
-                float CHUNK_SIZE = 16f;
-
-                Vector3 chunkWorldPos = new Vector3(
-                    chunk.Position.X * CHUNK_SIZE,
-                    chunk.yCoord * CHUNK_SIZE,
-                    chunk.Position.Y * CHUNK_SIZE
-                );
-
-                
-                BoundingBox chunkBounds = new BoundingBox(
-                    chunkWorldPos,
-                    chunkWorldPos + new Vector3(CHUNK_SIZE, CHUNK_SIZE, CHUNK_SIZE)
-                );
-
-
-                if (!camera.IsChunkVisible(chunkBounds) || Vector3.DistanceSquared(chunkWorldPos, Main.cameraV2.Position) > (16 * viewLength) * (16 * viewLength))
-                    continue;
-
-                chunkBufferQueue[i].Draw(basicEffect);
-                Main.drawedChunk += 1;
-            }*/
-
-
-
 
             for (int i = 0; i < 10; i++)
             {
@@ -390,179 +309,13 @@ namespace DiscCraft_2
 
             }
         }
-
-
-        public static Chunk GetChunk(Vect2 chunkPos)
-        {
-            if(chunks.ContainsKey(chunkPos))
-                return chunks[chunkPos];
-
-            return null;
-        }
-
-        public static Chunk GetChunk(Vector2 _chunkPos)
-        {
-
-            Vect2 chunk = new Vect2((int)_chunkPos.X, (int)_chunkPos.Y);
-
-            if (chunks.ContainsKey(chunk))
-                return chunks[chunk];
-
-            return null;
-        }
-
-
-
-
-        public static void UnloadChunk()
-        {
-
-            while (true)
-            {
-
-                Console.WriteLine("Thread Chunk unloader is operationnal !");
-
-                Vect2 plr = new Vect2((int)Main.cameraV2.Position.X, (int)Main.cameraV2.Position.Z);
-                plr = plr / 16;
-
-
-                for (int i = plr.X - 20; i <= plr.X + 20; i++)
-                {
-                    for (int j = plr.Y - 20; j <= plr.Y + 20; j++)
-                    {
-
-                        if(i < plr.X - viewLength - 1 || i > plr.X + viewLength + 1 || j > plr.Y + viewLength + 1 || j < plr.Y - viewLength - 1)
-                            if (chunks.ContainsKey(new Vect2(i, j)))
-                            {
-
-                                Main.VERTEX -= chunks[new Vect2(i, j)].VERTEX;
-                                Main.TRIANGLES -= chunks[new Vect2(i, j)].TRIANGLES;
-
-                                ChunkLoader.SaveChunk(new Vect2(i, j));
-                                chunks.Remove(new Vect2(i, j));
-
-                            }
-
-                    }
-                }
-
-                Thread.Sleep(5000);
-
-
-            }
-
-        }
-
-
-        public static List<ChunkBuffer> chunkBufferQueue = new List<ChunkBuffer>();
-        public static List<ChunkBuffer> chunkGraphiqueQueue = new List<ChunkBuffer>();
-
-
-        public static void GenerateChunkVertexTask(Vect2 chunk, int yCoord, GraphicsDevice gpu)
-        {
-
-            for (int h = 0; h < 4*4; h++)
-            {
-                ChunkBuffer b = new ChunkBuffer(gpu, chunk, h);
-
-                b.BuildVertex(chunks[chunk].blocks);
-
-                if (b.hasVertex)
-                    chunkGraphiqueQueue.Add(b);
-
-                Main.VERTEX += b.vertexCount;
-
-            }
-
-        }
-
-        public static void UpdateChunkVertexTask(Vect2 chunk, GraphicsDevice gpu)
-        {
-
-            bool exist = false;
-            for (int h = 0; h < 4; h++)
-            {
-                ChunkBuffer b = new ChunkBuffer(gpu, chunk, h);
-
-                b.BuildVertex(chunks[chunk].blocks);
-                if (b.hasVertex)
-                {
-                    b.BuildBuffer();
-
-                    lock (chunkBufferQueue)
-                    {
-                        for (int i = 0; i < chunkBufferQueue.Count; i++)
-                        {
-                            if (chunkBufferQueue[i].Position == chunk && chunkBufferQueue[i].yCoord == h)
-                            {
-                                Main.VERTEX -= chunkBufferQueue[i].vertexCount;
-                                chunkBufferQueue[i] = b;
-                                Main.VERTEX += b.vertexCount;
-                                exist = true;
-                            }
-                        }
-
-                        if (!exist)
-                        {
-                            Main.VERTEX += b.vertexCount;
-                            chunkBufferQueue.Add(b);
-                        }
-
-                    }
-                    
-                    Main.VERTEX += b.vertexCount;
-
-                }
-                exist = false;
-            }
-
-
-        }
-
-
-
-
-
-        public static Chunk GetChunkWithBlockCoord(Vector3 blockCoord)
-        {
-            Vect2 chunkCoord = new Vect2(MathUtils.RoundLower(blockCoord.X / 16), MathUtils.RoundLower(blockCoord.Z / 16));
-
-            if (blockCoord.X < 0 && (int)(blockCoord.X / 16) == (blockCoord.X / 16)) chunkCoord.X += 1;
-            if (blockCoord.Z < 0 && (int)(blockCoord.Z / 16) == (blockCoord.Z / 16)) chunkCoord.Y += 1;
-
-            lock (chunks)
-            {
-                if (chunks.ContainsKey(chunkCoord) && blockCoord.Y >= 0 && blockCoord.Y < 64)
-                    return chunks[chunkCoord];
-                else
-                    return null;
-            }
-            
-        }
-
-        public static Vector3 GetBlockCoordInChunk(Vector3 blockCoord)
-        {
-            int X = (int)(((blockCoord.X / 16) - MathUtils.RoundLower(blockCoord.X / 16)) * 16);
-            int Z = (int)(((blockCoord.Z / 16) - MathUtils.RoundLower(blockCoord.Z / 16)) * 16);
-
-            if (X == 16) X = 0;
-            if (Z == 16) Z = 0;
-
-            return new Vector3(X, blockCoord.Y, Z);
-        }
-
-
-
-
-
-
-
+       
 
         public static int GetBlock(Vector3 block)
         {
 
-            ChunkV2 chunk = GetChunkWithBlockCoord2(block);
-            Vector3 coordInChunk = GetBlockCoordInChunk2(block);
+            ChunkV2 chunk = GetChunkWithBlockCoord(block);
+            Vector3 coordInChunk = GetBlockCoordInChunk(block);
 
             if (chunk == null)
                 return 0;
@@ -574,8 +327,8 @@ namespace DiscCraft_2
         public static void SetBlock(Vector3 block, int type)
         {
 
-            ChunkV2 chunk = GetChunkWithBlockCoord2(block);
-            Vector3 coordInChunk = GetBlockCoordInChunk2(block);
+            ChunkV2 chunk = GetChunkWithBlockCoord(block);
+            Vector3 coordInChunk = GetBlockCoordInChunk(block);
 
             if (chunk != null)
                 chunk.SetBlock(coordInChunk, type);
@@ -583,7 +336,7 @@ namespace DiscCraft_2
         }
 
 
-        public static ChunkV2 GetChunkWithBlockCoord2(Vector3 blockCoord)
+        public static ChunkV2 GetChunkWithBlockCoord(Vector3 blockCoord)
         {
             Vect2 chunkCoord = new Vect2(MathUtils.RoundLower(blockCoord.X / 16), MathUtils.RoundLower(blockCoord.Z / 16));
 
@@ -611,7 +364,7 @@ namespace DiscCraft_2
             return (chunkCoord, subC);
         }
 
-        public static Vector3 GetBlockCoordInChunk2(Vector3 blockCoord)
+        public static Vector3 GetBlockCoordInChunk(Vector3 blockCoord)
         {
             int X = (int)(((blockCoord.X / 16) - MathUtils.RoundLower(blockCoord.X / 16)) * 16);
             int Z = (int)(((blockCoord.Z / 16) - MathUtils.RoundLower(blockCoord.Z / 16)) * 16);
