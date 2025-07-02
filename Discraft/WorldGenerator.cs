@@ -23,10 +23,6 @@ namespace Discraft
 
             int h = (int)(n.Noise(position.X, position.Y) * 200);  // * 60      80
 
-
-            //Init();
-            //int h = (int)(perlin(worldPosition.X / 64.0f, worldPosition.Z / 64.0f, 1));
-
             if (Math.Abs(h - worldPosition.Y) <= 0.5f)
                 return 1;
 

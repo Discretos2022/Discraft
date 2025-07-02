@@ -312,7 +312,7 @@ namespace DiscCraft
 
             //Handler.Draw(cameraV2, GraphicsDevice, basicEffect);
 
-            bool lightEnable = false;
+            bool lightEnable = true;
             if (lightEnable) {
                 basicEffect.EnableDefaultLighting();   // make sure lighting is on
                 basicEffect.LightingEnabled = true;
@@ -370,7 +370,7 @@ namespace DiscCraft
             /// Calculate end of vision
             cursorEnd = Vector3.Transform(new Vector3(0, 0, range), rotationMatrix);
 
-            Vector3 selectPos = new Vector3(0, 255, 0);
+            Vector3 selectPos = new Vector3(0, 1024, 0);
             CollisionHelper.BlockFace face = CollisionHelper.BlockFace.None;
 
 
@@ -411,7 +411,26 @@ namespace DiscCraft
                     {
                         Vector3 v = new Vector3(x, y, z);
 
-                        Chunk c = Handler.GetChunkWithBlockCoord(v);
+
+                        if(Handler.GetBlock(v) != 0)
+                        {
+                            CollisionHelper.BlockFace res = CollisionHelper.RayBox(cursorOrigine, cursorOrigine + cursorEnd, v);
+
+                            if (res != CollisionHelper.BlockFace.None)
+                            {
+                                if (selectPos.Y == 1024 || Vector3.Distance(selectPos + new Vector3(0.5f, 0.5f, 0.5f), cursorOrigine) > Vector3.Distance(v + new Vector3(0.5f, 0.5f, 0.5f), cursorOrigine))
+                                {
+                                    selectPos = v;
+                                    face = res;
+
+                                    //Console.WriteLine($"Collision {x};{y};{z} -> {res}");
+                                }
+
+                            }
+                        }
+
+
+                        /*Chunk c = Handler.GetChunkWithBlockCoord(v);
 
                         if (c != null)
                         {
@@ -436,7 +455,7 @@ namespace DiscCraft
                                 }
                             }
 
-                        }
+                        }*/
 
                     }
                 }
@@ -448,10 +467,22 @@ namespace DiscCraft
 
             if (MouseInput.getMouseState().LeftButton == ButtonState.Pressed && MouseInput.getOldMouseState().LeftButton != ButtonState.Pressed)
             {
-                if(selectPos.Y != 255)
+                if(selectPos.Y != 1024)
                 {
 
-                    Chunk c = Handler.GetChunkWithBlockCoord(selectPos);
+
+                    Handler.SetBlock(selectPos, 0);
+
+                    Handler.UpdateSubChunk(Handler.GetSubchunkKeyWithBlockCoord(selectPos));
+
+                    Handler.UpdateSubChunk(Handler.GetSubchunkKeyWithBlockCoord(selectPos + new Vector3(1, 0, 0)));
+                    Handler.UpdateSubChunk(Handler.GetSubchunkKeyWithBlockCoord(selectPos + new Vector3(-1, 0, 0)));
+                    Handler.UpdateSubChunk(Handler.GetSubchunkKeyWithBlockCoord(selectPos + new Vector3(0, 1, 0)));
+                    Handler.UpdateSubChunk(Handler.GetSubchunkKeyWithBlockCoord(selectPos + new Vector3(0, -1, 0)));
+                    Handler.UpdateSubChunk(Handler.GetSubchunkKeyWithBlockCoord(selectPos + new Vector3(0, 0, 1)));
+                    Handler.UpdateSubChunk(Handler.GetSubchunkKeyWithBlockCoord(selectPos + new Vector3(0, 0, -1)));
+
+                    /*Chunk c = Handler.GetChunkWithBlockCoord(selectPos);
 
                     if (c != null)
                     {
@@ -462,41 +493,52 @@ namespace DiscCraft
 
                         Handler.UpdateChunkVertexTask(c.Position/16, GraphicsDevice);
 
-                    }
+                    }*/
                 }
             }
 
             if (MouseInput.getMouseState().RightButton == ButtonState.Pressed && MouseInput.getOldMouseState().RightButton != ButtonState.Pressed)
             {
-                if (selectPos.Y != 255)
+                if (selectPos.Y != 1024)
                 {
 
-                    Chunk c = Handler.GetChunkWithBlockCoord(selectPos);
+                    //Chunk c = Handler.GetChunkWithBlockCoord(selectPos);
 
-                    if (c != null)
-                    {
-                        Vector3 a = Vector3.Zero;
-                        if (face == CollisionHelper.BlockFace.Right)
-                            a = new Vector3(1, 0, 0);
-                        else if (face == CollisionHelper.BlockFace.Left)
-                            a = new Vector3(-1, 0, 0);
-                        else if (face == CollisionHelper.BlockFace.Top)
-                            a = new Vector3(0, 1, 0);
-                        else if (face == CollisionHelper.BlockFace.Bottom)
-                            a = new Vector3(0, -1, 0);
-                        else if (face == CollisionHelper.BlockFace.Front)
-                            a = new Vector3(0, 0, -1);
-                        else if (face == CollisionHelper.BlockFace.Back)
-                            a = new Vector3(0, 0, 1);
+                    //if (c != null)
+                    //{
+                    Vector3 a = Vector3.Zero;
+                    if (face == CollisionHelper.BlockFace.Right)
+                        a = new Vector3(1, 0, 0);
+                    else if (face == CollisionHelper.BlockFace.Left)
+                        a = new Vector3(-1, 0, 0);
+                    else if (face == CollisionHelper.BlockFace.Top)
+                        a = new Vector3(0, 1, 0);
+                    else if (face == CollisionHelper.BlockFace.Bottom)
+                        a = new Vector3(0, -1, 0);
+                    else if (face == CollisionHelper.BlockFace.Front)
+                        a = new Vector3(0, 0, -1);
+                    else if (face == CollisionHelper.BlockFace.Back)
+                        a = new Vector3(0, 0, 1);
 
-                        Chunk ca = Handler.GetChunkWithBlockCoord(selectPos + a);
-                        Vector3 bCoord = Handler.GetBlockCoordInChunk(selectPos + a);
+                    Handler.SetBlock(selectPos + a, 3);
 
-                        ca.blocks[(int)bCoord.X, (int)bCoord.Y, (int)bCoord.Z] = new Block(3);
-                        Handler.UpdateChunkVertexTask(c.Position / 16, GraphicsDevice);
+                    Handler.UpdateSubChunk(Handler.GetSubchunkKeyWithBlockCoord(selectPos));
+
+                    Handler.UpdateSubChunk(Handler.GetSubchunkKeyWithBlockCoord(selectPos + new Vector3(1, 0, 0)));
+                    Handler.UpdateSubChunk(Handler.GetSubchunkKeyWithBlockCoord(selectPos + new Vector3(-1, 0, 0)));
+                    Handler.UpdateSubChunk(Handler.GetSubchunkKeyWithBlockCoord(selectPos + new Vector3(0, 1, 0)));
+                    Handler.UpdateSubChunk(Handler.GetSubchunkKeyWithBlockCoord(selectPos + new Vector3(0, -1, 0)));
+                    Handler.UpdateSubChunk(Handler.GetSubchunkKeyWithBlockCoord(selectPos + new Vector3(0, 0, 1)));
+                    Handler.UpdateSubChunk(Handler.GetSubchunkKeyWithBlockCoord(selectPos + new Vector3(0, 0, -1)));
+
+                    /*Chunk ca = Handler.GetChunkWithBlockCoord(selectPos + a);
+                    Vector3 bCoord = Handler.GetBlockCoordInChunk(selectPos + a);
+
+                    ca.blocks[(int)bCoord.X, (int)bCoord.Y, (int)bCoord.Z] = new Block(3);
+                    Handler.UpdateChunkVertexTask(c.Position / 16, GraphicsDevice);*/
 
 
-                    }
+                    //}
                 }
             }
 
@@ -627,8 +669,8 @@ namespace DiscCraft
             spriteBatch.DrawString(UltimateFont, "fps : " + Math.Round(1.0f / (fpsTime / 1000)), new Vector2(10, 400), Color.White);
 
 
-            spriteBatch.DrawString(UltimateFont, "ready to update : " + Handler.chunkStack.Count, new Vector2(10, 500), Color.White);
-            spriteBatch.DrawString(UltimateFont, "loaded chunks   : " + Handler.chunks.Count, new Vector2(10, 520), Color.White);
+            //spriteBatch.DrawString(UltimateFont, "ready to update : " + Handler.chunkStack.Count, new Vector2(10, 500), Color.White);
+            spriteBatch.DrawString(UltimateFont, "loaded chunks   : " + Handler.chunks2.Count, new Vector2(10, 520), Color.White);
 
 
 

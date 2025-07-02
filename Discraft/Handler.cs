@@ -3,13 +3,12 @@ using Discraft;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Linq;
-using System.Net.Http.Headers;
-using System.Text;
+using System.ComponentModel;
+using System.Drawing;
 using System.Threading;
 using System.Threading.Tasks;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace DiscCraft_2
 {
@@ -32,7 +31,15 @@ namespace DiscCraft_2
 
         public static Dictionary<Vect2, Chunk> chunks = new Dictionary<Vect2, Chunk>();
 
+        public static ConcurrentDictionary<Vect2, ChunkV2> chunks2 = new ConcurrentDictionary<Vect2, ChunkV2>();
+        public static List<Vect2> queue2 = new List<Vect2>();
+
+        public static ConcurrentDictionary<(Vect2, int), byte> updateVertexQueue = new ConcurrentDictionary<(Vect2, int), byte>();
+        public static ConcurrentDictionary<(Vect2, int), byte> updateBufferQueue = new ConcurrentDictionary<(Vect2, int), byte>();
+
+
         public static Thread chunkLoader;
+        public static Thread chunkVertexBuilder;
         public static Thread chunkUnloader;
         public static Thread chunkUpdater;
 
@@ -51,123 +58,31 @@ namespace DiscCraft_2
 
             player = new Player(new Vector3(0, 50, 0));
 
-            //for (int i = 0; i < chunks.GetLength(0); i++)
-            //{
-            //    for(int j = 0; j < chunks.GetLength(1); j++)
-            //    {
-
-            //        chunks[i, j] = new Chunk(new Vector2(i, j), gpu);
-
-            //        Console.Clear();
-
-            //        int num2 = (int)(num * 100 / (chunks.GetLength(0) * chunks.GetLength(1)));
-
-            //        Console.WriteLine("Loading : " + num2 + "%");
-
-            //        Console.Write("[");
-
-            //        for (int l = 0; l < num2 / 10; l++)
-            //        {
-            //            Console.Write("=");
-            //        }
-
-            //        Console.Write(">");
-
-            //        for (int l = 0; l < 10 - (num2 / 10) - 1; l++)
-            //        {
-            //            Console.Write(" ");
-            //        }
-
-            //        Console.Write("]");
-
-            //        num += 1;
-            //    }
-            //}
+            
 
             int worldSize = 8; // 64
 
 
-            /*for (int i = 0; i < worldSize; i++)
-            {
-                for (int j = 0; j < worldSize; j++)
-                {
-
-                    //if(i == 0 && j == 0)
-                    //{
-                        chunks.Add(new Vect2(i, j), ChunkLoader.LoadChunk(new Vect2(i, j), gpu));
-                    //}
-                    //else
-                    //{
-                    //    chunks.Add(new Vect2(i, j), new Chunk(new Vect2(i, j), gpu));
-
-                    Console.Clear();
-
-                    int num2 = (int)(num * 100 / (worldSize * worldSize));
-
-                    Console.WriteLine("Loading : " + num2 + "%" + " (Chunk loading...)");
-
-                    Console.Write("[");
-
-                    for (int l = 0; l < num2 / 10; l++)
-                    {
-                        Console.Write("=");
-                    }
-
-                    Console.Write(">");
-
-                    for (int l = 0; l < 10 - (num2 / 10) - 1; l++)
-                    {
-                        Console.Write(" ");
-                    }
-
-                    Console.Write("]");
-
-                    num += 1;
-                    //}
-
-
-
-                }
-            }
-
-            Console.Clear();
-
-            num -= 1;
-
-            int num3 = (int)(num * 100 / (worldSize * worldSize));
-
-            Console.WriteLine("Loading : " + num3 + "%" + " (Vertex Generation...)");
-
-            Console.Write("[");
-
-            for (int l = 0; l < num3 / 10; l++)
-            {
-                Console.Write("=");
-            }
-
-            Console.Write(">");
-
-            for (int l = 0; l < 10 - (num3 / 10) - 1; l++)
-            {
-                Console.Write(" ");
-            }
-
-            Console.Write("]");
-
-            for (int i = 0; i < chunks.Count; i++)
-            {
-                KeyValuePair<Vect2, Chunk> chunk = chunks.ElementAt(i);
-                chunks[chunk.Key].InitVertexBuffer();
-            }
-
-
+            /*
             Console.Clear();
             Console.WriteLine("Loading : 100%");
             Console.WriteLine("[==========]");*/
 
-            chunkLoader = new Thread(() => CheckChunk(gpu));
-            chunkLoader.Priority = ThreadPriority.Highest;
+            chunkLoader = new Thread(() => LoadChunkTask(gpu));
+            chunkLoader.Priority = ThreadPriority.Normal;
             chunkLoader.Start();
+
+            chunkVertexBuilder = new Thread(() => VertexBuilderTask());
+            chunkVertexBuilder.Priority = ThreadPriority.Normal;
+            chunkVertexBuilder.Start();
+
+            chunkUnloader = new Thread(() => UnloadChunkTask());
+            chunkUnloader.Priority = ThreadPriority.Normal;
+            chunkUnloader.Start();
+
+            chunkUpdater = new Thread(() => UpdateChunkTask());
+            chunkUpdater.Priority = ThreadPriority.Normal;
+            chunkUpdater.Start();
 
             /*chunkUnloader = new Thread(() => UnloadChunk());
             chunkUnloader.Priority = ThreadPriority.Lowest;
@@ -183,21 +98,10 @@ namespace DiscCraft_2
         public static void Draw(GraphicsDevice gpu, BasicEffect basicEffect, Camera camera)
         {
 
-            viewLength = 16; // 8
-
-            //for (int i = 0; i < chunks.GetLength(0); i++)
-            //{
-            //    for (int j = 0; j < chunks.GetLength(1); j++)
-            //    {
-
-            //        //if (Vector2.Distance(chunks[i, j].Position, new Vector2(camera.Position.X, camera.Position.Z)) < 200)
-            //        chunks[i, j].Draw(gpu, basicEffect);
-
-            //    }
-            //}
+            viewLength = 10; // 8
 
 
-            for (int i = 0; i < 10; i++)
+            /*for (int i = 0; i < 10; i++)
             {
                 if (chunkGraphiqueQueue.Count > 0)
                 {
@@ -209,11 +113,10 @@ namespace DiscCraft_2
                     }
 
                 }
-            }
+            }*/
 
 
-
-            Main.drawedChunk = 0;
+            /*Main.drawedChunk = 0;
             int max = chunkBufferQueue.Count;
             for (int i = 0; i < max; i++)
             {
@@ -238,57 +141,33 @@ namespace DiscCraft_2
                 );
 
 
-                if (!camera.IsChunkVisible(chunkBounds) || Vector3.DistanceSquared(chunkWorldPos, Main.cameraV2.Position) > (16 * 24)*(16 * 24))
+                if (!camera.IsChunkVisible(chunkBounds) || Vector3.DistanceSquared(chunkWorldPos, Main.cameraV2.Position) > (16 * viewLength) * (16 * viewLength))
                     continue;
 
                 chunkBufferQueue[i].Draw(basicEffect);
                 Main.drawedChunk += 1;
+            }*/
+
+
+
+
+            for (int i = 0; i < 10; i++)
+            {
+                if (queue2.Count > 0)
+                {
+                    ChunkV2 c;
+                    chunks2.TryGetValue(queue2[0], out c);
+                    c?.BuildBuffer();
+                    queue2.RemoveAt(0);
+                }
             }
 
 
-
-
-            /*lock (chunks)
+            Main.drawedChunk = 0;
+            foreach (var c in chunks2)
             {
-                for (int i = 0; i < chunks.Count; i++)
-                {
-
-                    ///Vector2 point = (new Vector2(Main.cameraV2.cameraLookAt.X, Main.cameraV2.cameraLookAt.Z) - new Vector2(Main.cameraV2.Position.X, Main.cameraV2.Position.Z)) * 120 + new Vector2(Main.cameraV2.Position.X, Main.cameraV2.Position.Z);
-
-                    ///KeyValuePair<Vect2, Chunk> chunk = chunks.ElementAt(i);
-                    //if (Vector2.Distance(chunk.Key * 16, new Vector2(Main.cameraV2.Position.X, Main.cameraV2.Position.Z)) < 350)
-                    //{
-
-                    //float num = Util.GetAngleBetweenVector(new Vector2(Main.cameraV2.cameraLookAt.X, Main.cameraV2.cameraLookAt.Z), new Vector2(Main.cameraV2.Position.X - chunk.Key.X * 16, Main.cameraV2.Position.Z - chunk.Key.Y * 16)); //Util.GetAngleBetweenVector(new Vector2(Main.cameraV2.Rotation.Y, Main.cameraV2.Rotation.Y) + new Vector2(Main.cameraV2.Position.X, Main.cameraV2.Position.Z), new Vector2(Main.cameraV2.Position.X - chunk.Key.X * 16, Main.cameraV2.Position.Y - chunk.Key.Y * 16));
-
-                    //if (chunk.Key == Vector2.Zero)
-                    //Console.WriteLine(num);
-
-                    ///chunks[chunk.Key].isDrawed = true;
-                    ///if (Vector2.Distance(new Vector2(chunk.Key.X + 0.5f, chunk.Key.Y + 0.5f) * 16, point) > 128)//(Util.GetAngleBetweenVector(new Vector2(Main.cameraV2.cameraLookAt.X, Main.cameraV2.cameraLookAt.Z), new Vector2(Main.cameraV2.Position.X - chunk.Key.X * 16, Main.cameraV2.Position.Z - chunk.Key.Y * 16)) <= 0.025f) //if (Util.GetAngleBetweenVector(new Vector2(Main.cameraV2.cameraLookAt.X, Main.cameraV2.cameraLookAt.Y), new Vector2(Main.cameraV2.Position.X - chunk.Key.X * 16, Main.cameraV2.Position.Y - chunk.Key.Y * 16)) >= 0.025f) // 0.05
-                    ///chunks[chunk.Key].isDrawed = false;
-                    ///else
-                    ///chunks[chunk.Key].Draw(gpu, basicEffect);
-                    ///
-                    try
-                    {
-                        //if(chunks.ElementAt(i).Key == new Vect2(0, 0))
-                        chunks.ElementAt(i).Value.Draw(gpu, basicEffect);
-                    }
-                    catch (InvalidOperationException e)
-                    {
-                        Console.WriteLine(e);
-                        continue;
-                    }
-
-
-
-                    //}
-
-                }
-            }*/
-
-                        
+                c.Value.Draw(basicEffect, camera);
+            }
 
         }
 
@@ -298,42 +177,36 @@ namespace DiscCraft_2
 
             player.Update(gameTime, game);
 
-            //CheckAsync(gpu);
-
-            //for (int i = 0; i < chunks.Count; i++)
-            //{
-            //    KeyValuePair<Vect2, Chunk> chunk = chunks.ElementAt(i);
-
-            //    if (chunk.Key.X > 6)
-            //        chunks.Remove(chunk.Key);
-            //    else if (chunk.Key.X < -6)
-            //        chunks.Remove(chunk.Key);
-
-            //    else if (chunk.Key.Y > 6)
-            //        chunks.Remove(chunk.Key);
-            //    else if (chunk.Key.Y < -6)
-            //        chunks.Remove(chunk.Key);
-
-            //}
+            foreach (var sc in updateBufferQueue)
+            {
+                chunks2.TryGetValue(sc.Key.Item1, out ChunkV2 c);
+                c?.BuildBuffer(sc.Key.Item2);
+            }
+            updateBufferQueue.Clear();
 
         }
 
-        public static async void CheckAsync(GraphicsDevice gpu)
+        public static void UpdateSubChunk((Vect2, int) subChunk)
         {
-            await Task.Run(() => CheckChunk(gpu));
+            updateVertexQueue.TryAdd(subChunk, 0);
         }
 
 
-        public static void CheckChunk(GraphicsDevice gpu)
+        public static void LoadChunkTask(GraphicsDevice gpu)
         {
+
+            Vect2 plr = new Vect2();
 
             while (true)
             {
 
                 //Console.WriteLine("Thread Chunk loader is operationnal !");
 
-                Vect2 plr = new Vect2((int)Main.cameraV2.Position.X, (int)Main.cameraV2.Position.Z);
-                plr = plr / 16;
+                //Vect2 plr = new Vect2((int)Main.cameraV2.Position.X, (int)Main.cameraV2.Position.Z);
+                //plr = plr / 16;
+
+                plr.X = (int)Main.cameraV2.Position.X / 16;
+                plr.Y = (int)Main.cameraV2.Position.Z / 16;
 
 
                 for (int i = plr.X - viewLength; i <= plr.X + viewLength; i++)
@@ -341,35 +214,16 @@ namespace DiscCraft_2
                     for (int j = plr.Y - viewLength; j <= plr.Y + viewLength; j++)
                     {
 
-                        if (!chunks.ContainsKey(new Vect2(i, j)))
-                        {
-                            try
+                        //if (!chunks.ContainsKey(new Vect2(i, j)))
+                        //{
+                            /*try
                             {
 
                                 Chunk c = new Chunk(new Vect2(i, j), gpu);
 
                                 chunks.Add(new Vect2(i, j), c);
-                                //chunks[new Vect2(i, j)].InitVertexBuffer();
-
-                                chunkStack.Add(new Vect2(i, j));
-
-                                //for (int h = 0; h < 4; h++)
-                                    //GenerateChunkVertexTask(new Vect2(i, j), h, gpu);
-
-                                //for (int x = i - 1; x <= i + 1; x++)
-                                //{
-                                //    for (int y = j - 1; y <= j + 1; y++)
-                                //    {
-                                //        if (chunks.ContainsKey(new Vect2(x, y)))
-                                //            chunks[new Vect2(x, y)].InitVertexBuffer();
-                                //    }
-                                //}
 
                                 Console.WriteLine("CHUNK " + i + " : " + j + " Created !");
-
-
-                                //Thread generate = new Thread(() => GenerateChunkAsync(gpu, i, j));
-                                //generate.Start();
 
 
                             }
@@ -377,18 +231,14 @@ namespace DiscCraft_2
                             {
                                 Console.WriteLine(e);
                             
-                            }
+                            }*/
 
-                            /*if (chunks.ContainsKey(new Vect2(i - 1, j)))
-                                chunkStack.Add(new Vect2(i - 1, j));
-                            if (chunks.ContainsKey(new Vect2(i + 1, j)))
-                                chunkStack.Add(new Vect2(i + 1, j));
-                            if (chunks.ContainsKey(new Vect2(i, j - 1)))
-                                chunkStack.Add(new Vect2(i, j - 1));
-                            if (chunks.ContainsKey(new Vect2(i, j + 1)))
-                                chunkStack.Add(new Vect2(i, j + 1));*/
 
-                        }
+                            chunks2.TryAdd(new Vect2(i, j), new ChunkV2(i, j, gpu));
+                            //Console.WriteLine("CHUNK " + i + " : " + j + " Created !");
+
+
+                        //}
 
                     }
                 }
@@ -396,7 +246,7 @@ namespace DiscCraft_2
                 //Thread.Sleep(1000);
 
 
-                for (int i = plr.X - viewLength; i <= plr.X + viewLength; i++)
+                /*for (int i = plr.X - viewLength; i <= plr.X + viewLength; i++)
                 {
                     for (int j = plr.Y - viewLength; j <= plr.Y + viewLength; j++)
                     {
@@ -422,44 +272,123 @@ namespace DiscCraft_2
 
                         }
 
+                        ChunkV2 c;
+                        if(chunks2.TryGetValue(new Vect2(i, j), out c))
+                        {
+                            if (!c.isVertexBuilded)
+                            {
+                                c.BuildVertex();
+                                queue2.Add(new Vect2(i, j));
+                            }
+                        }
+
                     }
-                }
+                }*/
 
 
-                Thread.Sleep(10000); // 1000
+                Thread.Sleep(16); // 1000
 
 
             }
 
         }
 
-        public static void GenerateChunkAsync(GraphicsDevice gpu, int i, int j)
+        public static void VertexBuilderTask()
         {
-            if(!chunks.ContainsKey(new Vect2(i, j)))
+
+            Vect2 plr = new Vect2();
+
+            while (true)
             {
 
-                Chunk c = new Chunk(new Vect2(i, j), gpu);
+                plr.X = (int)Main.cameraV2.Position.X / 16;
+                plr.Y = (int)Main.cameraV2.Position.Z / 16;
 
-                if (!chunks.ContainsKey(new Vect2(i, j)))
-                    chunks.Add(new Vect2(i, j), c);
-                //chunks[new Vect2(i, j)].InitVertexBuffer();
-
-                if(chunkStack.Contains(new Vect2(i, j)))
-                    chunkStack.Add(new Vect2(i, j));
+                for (int i = plr.X - viewLength; i <= plr.X + viewLength; i++)
+                {
+                    for (int j = plr.Y - viewLength; j <= plr.Y + viewLength; j++)
+                    {
 
 
-                //for (int x = i - 1; x <= i + 1; x++)
-                //{
-                //    for (int y = j - 1; y <= j + 1; y++)
-                //    {
-                //        if (chunks.ContainsKey(new Vect2(x, y)))
-                //            chunks[new Vect2(x, y)].InitVertexBuffer();
-                //    }
-                //}
+                        bool existAdjacent = chunks2.TryGetValue(new Vect2(i - 1, j), out _) &&
+                                        chunks2.TryGetValue(new Vect2(i + 1, j), out _) &&
+                                        chunks2.TryGetValue(new Vect2(i, j - 1), out _) &&
+                                        chunks2.TryGetValue(new Vect2(i, j + 1), out _);
 
-                Console.WriteLine("CHUNK " + i + " : " + j + " Created !");
+                        
+                        if (existAdjacent && chunks2.TryGetValue(new Vect2(i, j), out ChunkV2 c))
+                        {
+
+                            int localI = i;
+                            int localJ = j;
+
+                            //Task.Run(() =>
+                            //{
+
+                                if (!c.isVertexBuilded)
+                                {
+                                    c.BuildVertex();
+                                    queue2.Add(new Vect2(localI, localJ));
+                                    Console.WriteLine("CHUNK " + localI + " : " + localJ + " Vertex Created !");
+                                }
+
+                            //});
+
+                            
+                        }
+
+                    }
+                }
+
+                Thread.Sleep(16);
+
             }
-            
+
+        }
+
+        public static void UnloadChunkTask()
+        {
+            Vect2 plr = new Vect2();
+
+            while (true)
+            {
+
+                plr.X = (int)Main.cameraV2.Position.X / 16;
+                plr.Y = (int)Main.cameraV2.Position.Z / 16;
+
+                foreach (var chunk in chunks2)
+                {
+
+                    // Manhattan distance
+                    if (Math.Abs(plr.X - chunk.Key.X) > (viewLength + 2) || Math.Abs(plr.Y - chunk.Key.Y) > (viewLength + 2))
+                    {
+                        chunk.Value?.Dispose();
+                        chunks2.TryRemove(chunk);
+                    }
+                }
+
+                Thread.Sleep(16);
+
+            }
+        }
+
+        public static void UpdateChunkTask()
+        {
+
+            while (true)
+            {
+
+                foreach(var sc in updateVertexQueue)
+                {
+                    chunks2.TryGetValue(sc.Key.Item1, out ChunkV2 c);
+                    c?.BuildVertex(sc.Key.Item2);
+                    updateBufferQueue.TryAdd(sc.Key, 0);
+                }
+                updateVertexQueue.Clear();
+
+                Thread.Sleep(16);
+
+            }
         }
 
 
@@ -525,44 +454,6 @@ namespace DiscCraft_2
         }
 
 
-        public static List<Vect2> chunkStack = new List<Vect2>();
-
-        public static void UpdateChunk()
-        {
-
-            while (true)
-            {
-
-                Vect2 playerPos = new Vect2((int)Main.cameraV2.Position.X, (int)Main.cameraV2.Position.Z);
-                //chunkStack.OrderBy((x) => (-Vect2.Distance(x * 16, playerPos)));
-
-                for (int i = 0; i < chunkStack.Count; i++)
-                {
-                    if (chunks.ContainsKey(chunkStack[i]))
-                        //if (chunks[chunkStack[i]].isDrawed == false)
-                        if (chunks.ContainsKey(new Vect2(chunkStack[i].X + 1, chunkStack[i].Y)))
-                            if (chunks.ContainsKey(new Vect2(chunkStack[i].X - 1, chunkStack[i].Y)))
-                                if (chunks.ContainsKey(new Vect2(chunkStack[i].X, chunkStack[i].Y + 1)))
-                                    if (chunks.ContainsKey(new Vect2(chunkStack[i].X, chunkStack[i].Y - 1)))
-                                    {
-                                        Main.VERTEX -= chunks[chunkStack[i]].VERTEX;
-                                        Main.TRIANGLES -= chunks[chunkStack[i]].TRIANGLES;
-                                        chunks[chunkStack[i]].InitVertexBuffer();
-                                        Main.VERTEX += chunks[chunkStack[i]].VERTEX;
-                                        Main.TRIANGLES += chunks[chunkStack[i]].TRIANGLES;
-                                        chunkStack.Remove(chunkStack[i]);
-                                    }
-
-                }
-                
-
-                //Thread.Sleep(100);
-
-            }
-
-        }
-
-
         public static List<ChunkBuffer> chunkBufferQueue = new List<ChunkBuffer>();
         public static List<ChunkBuffer> chunkGraphiqueQueue = new List<ChunkBuffer>();
 
@@ -570,42 +461,23 @@ namespace DiscCraft_2
         public static void GenerateChunkVertexTask(Vect2 chunk, int yCoord, GraphicsDevice gpu)
         {
 
-            //Task task = new Task(() => {
+            for (int h = 0; h < 4*4; h++)
+            {
+                ChunkBuffer b = new ChunkBuffer(gpu, chunk, h);
 
-                for (int h = 0; h < 4*4; h++)
-                {
-                    ChunkBuffer b = new ChunkBuffer(gpu, chunk, h);
-
-                    b.BuildVertex(chunks[chunk].blocks);
-                //if (b.hasVertex)
-                //b.BuildBuffer();
+                b.BuildVertex(chunks[chunk].blocks);
 
                 if (b.hasVertex)
                     chunkGraphiqueQueue.Add(b);
-                    //chunkBufferQueue.Add(b);
-                //else
 
-                //Console.WriteLine("--> " + chunk.X + ";" + chunk.Y + " | " + b.vertexCount);
                 Main.VERTEX += b.vertexCount;
 
-                tasknum -= 1;
-
-                }
-
-            //});
-
-            tasknum += 1;
-            //task.Start();
-
-            //Console.WriteLine(task.Exception);
-
+            }
 
         }
 
         public static void UpdateChunkVertexTask(Vect2 chunk, GraphicsDevice gpu)
         {
-
-            //Task task = new Task(() => {
 
             bool exist = false;
             for (int h = 0; h < 4; h++)
@@ -638,21 +510,11 @@ namespace DiscCraft_2
 
                     }
                     
-                    //Console.WriteLine("--> " + chunk.X + ";" + chunk.Y + " | " + b.vertexCount);
                     Main.VERTEX += b.vertexCount;
-
-                    tasknum -= 1;
 
                 }
                 exist = false;
             }
-
-            //});
-
-            tasknum += 1;
-            //task.Start();
-
-            //Console.WriteLine(task.Exception);
 
 
         }
@@ -683,8 +545,76 @@ namespace DiscCraft_2
             int X = (int)(((blockCoord.X / 16) - MathUtils.RoundLower(blockCoord.X / 16)) * 16);
             int Z = (int)(((blockCoord.Z / 16) - MathUtils.RoundLower(blockCoord.Z / 16)) * 16);
 
-            //if (blockCoord.X < 0) X -= 1;
-            //if (blockCoord.X < 0) X -= 1;
+            if (X == 16) X = 0;
+            if (Z == 16) Z = 0;
+
+            return new Vector3(X, blockCoord.Y, Z);
+        }
+
+
+
+
+
+
+
+
+        public static int GetBlock(Vector3 block)
+        {
+
+            ChunkV2 chunk = GetChunkWithBlockCoord2(block);
+            Vector3 coordInChunk = GetBlockCoordInChunk2(block);
+
+            if (chunk == null)
+                return 0;
+            else
+                return chunk.GetBlock(coordInChunk);
+
+        }
+
+        public static void SetBlock(Vector3 block, int type)
+        {
+
+            ChunkV2 chunk = GetChunkWithBlockCoord2(block);
+            Vector3 coordInChunk = GetBlockCoordInChunk2(block);
+
+            if (chunk != null)
+                chunk.SetBlock(coordInChunk, type);
+
+        }
+
+
+        public static ChunkV2 GetChunkWithBlockCoord2(Vector3 blockCoord)
+        {
+            Vect2 chunkCoord = new Vect2(MathUtils.RoundLower(blockCoord.X / 16), MathUtils.RoundLower(blockCoord.Z / 16));
+
+            if (blockCoord.X < 0 && (int)(blockCoord.X / 16) == (blockCoord.X / 16)) chunkCoord.X += 1;
+            if (blockCoord.Z < 0 && (int)(blockCoord.Z / 16) == (blockCoord.Z / 16)) chunkCoord.Y += 1;
+
+            ChunkV2 c;
+            if (chunks2.TryGetValue(chunkCoord, out c))
+                return c;
+            else
+                return null;
+
+        }
+
+        public static (Vect2, int) GetSubchunkKeyWithBlockCoord(Vector3 blockCoord)
+        {
+            Vect2 chunkCoord = new Vect2(MathUtils.RoundLower(blockCoord.X / 16), MathUtils.RoundLower(blockCoord.Z / 16));
+
+            if (blockCoord.X < 0 && (int)(blockCoord.X / 16) == (blockCoord.X / 16)) chunkCoord.X += 1;
+            if (blockCoord.Z < 0 && (int)(blockCoord.Z / 16) == (blockCoord.Z / 16)) chunkCoord.Y += 1;
+
+            int subC = MathUtils.RoundLower(blockCoord.Y / 16);
+            if (blockCoord.Y < 0 && (int)(blockCoord.Y / 16) == (blockCoord.Y / 16)) subC += 1;
+
+            return (chunkCoord, subC);
+        }
+
+        public static Vector3 GetBlockCoordInChunk2(Vector3 blockCoord)
+        {
+            int X = (int)(((blockCoord.X / 16) - MathUtils.RoundLower(blockCoord.X / 16)) * 16);
+            int Z = (int)(((blockCoord.Z / 16) - MathUtils.RoundLower(blockCoord.Z / 16)) * 16);
 
             if (X == 16) X = 0;
             if (Z == 16) Z = 0;

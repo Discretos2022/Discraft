@@ -43,6 +43,8 @@ namespace Discraft
                 Details = "Dans les étoiles",
                 State = "Explore l'univers",
 
+                //Details = "Toujours plus puissant !",
+                //State = "Toujours plus loin !",
                 //Details = "Optimisation Graphique ?!",
                 //State = "Des Mondes TOUJOURS plus grand !",
                 //Details = "TOUJOURS plus de blocs ?!",
