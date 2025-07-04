@@ -214,7 +214,7 @@ namespace DiscCraft
             GraphicsDevice.DepthStencilState = DepthStencilState.Default;
 
 
-            bool lightEnable = true;
+            bool lightEnable = false;
             if (lightEnable) {
                 basicEffect.EnableDefaultLighting();   // make sure lighting is on
                 basicEffect.LightingEnabled = true;
@@ -228,9 +228,9 @@ namespace DiscCraft
                 //basicEffect.SpecularPower = 20f;
                 basicEffect.DiffuseColor = new Vector3(1, 1, 1); //basicEffect.DiffuseColor = new Vector3(0.3f, 0.3f, 0.3f);
                 basicEffect.FogEnabled = true;
-                basicEffect.FogStart = 256f; //80f   16 * 16
-                basicEffect.FogEnd = 306f; //130f
-                basicEffect.FogColor = new Vector3(0.3f,0.3f,0.3f);
+                basicEffect.FogStart = 16*12f; //80f   16 * 16
+                basicEffect.FogEnd = 16*14f; //130f
+                basicEffect.FogColor = new Vector3(0.0f,0.0f,0.0f);
             }
             else
                 basicEffect.LightingEnabled = false;

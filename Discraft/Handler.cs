@@ -17,7 +17,8 @@ namespace DiscCraft_2
     {
 
         public static ConcurrentDictionary<Vect2, ChunkV2> chunks2 = new ConcurrentDictionary<Vect2, ChunkV2>();
-        public static List<Vect2> queue2 = new List<Vect2>();
+        public static ConcurrentQueue<Vect2> queueToBuffer = new ConcurrentQueue<Vect2>();
+        public static ConcurrentQueue<Vect2> queueToConstructVertex = new ConcurrentQueue<Vect2>();
 
         public static ConcurrentDictionary<(Vect2, int), byte> updateVertexQueue = new ConcurrentDictionary<(Vect2, int), byte>();
         public static ConcurrentDictionary<(Vect2, int), byte> updateBufferQueue = new ConcurrentDictionary<(Vect2, int), byte>();
@@ -29,22 +30,17 @@ namespace DiscCraft_2
 
         public static int viewLength = 10;
 
-        public static int MAX_TASK = 100;
-        public static int tasknum = 0;
-
         public static Player player;
 
 
         public static void Init(GraphicsDevice gpu)
         {
 
-            int num = 0;
-
-            player = new Player(new Vector3(0, 50, 0));
+            player = new Player(new Vector3(0, 200, 0));
 
             
 
-            int worldSize = 8; // 64
+            int worldSize = 16; // 64
 
             chunkLoader = new Thread(() => LoadChunkTask(gpu));
             chunkLoader.Priority = ThreadPriority.Normal;
@@ -68,16 +64,15 @@ namespace DiscCraft_2
         public static void Draw(GraphicsDevice gpu, BasicEffect basicEffect, Camera camera)
         {
 
-            viewLength = 10; // 8
+            viewLength = 16; // 8
 
             for (int i = 0; i < 10; i++)
             {
-                if (queue2.Count > 0)
+                if (queueToBuffer.TryDequeue(out Vect2 v))
                 {
                     ChunkV2 c;
-                    chunks2.TryGetValue(queue2[0], out c);
+                    chunks2.TryGetValue(v, out c);
                     c?.BuildBuffer();
-                    queue2.RemoveAt(0);
                 }
             }
 
@@ -111,6 +106,8 @@ namespace DiscCraft_2
         }
 
 
+        static int taskNum = 0;
+
         public static void LoadChunkTask(GraphicsDevice gpu)
         {
 
@@ -119,144 +116,43 @@ namespace DiscCraft_2
             while (true)
             {
 
-                //Console.WriteLine("Thread Chunk loader is operationnal !");
-
-                //Vect2 plr = new Vect2((int)Main.cameraV2.Position.X, (int)Main.cameraV2.Position.Z);
-                //plr = plr / 16;
-
                 plr.X = (int)Main.cameraV2.Position.X / 16;
                 plr.Y = (int)Main.cameraV2.Position.Z / 16;
 
 
-                for (int i = plr.X - viewLength; i <= plr.X + viewLength; i++)
+
+                for (int r = 0; r <= viewLength; r++)
                 {
-                    for (int j = plr.Y - viewLength; j <= plr.Y + viewLength; j++)
+
+                    for (int i = plr.X - r; i <= plr.X + r; i++)
                     {
-
-                        //if (!chunks.ContainsKey(new Vect2(i, j)))
-                        //{
-                            /*try
-                            {
-
-                                Chunk c = new Chunk(new Vect2(i, j), gpu);
-
-                                chunks.Add(new Vect2(i, j), c);
-
-                                Console.WriteLine("CHUNK " + i + " : " + j + " Created !");
-
-
-                            }
-                            catch (ArgumentException e) 
-                            {
-                                Console.WriteLine(e);
-                            
-                            }*/
-
-
-                            chunks2.TryAdd(new Vect2(i, j), new ChunkV2(i, j, gpu));
-                            //Console.WriteLine("CHUNK " + i + " : " + j + " Created !");
-
-
-                        //}
-
+                        int j = plr.Y + r;
+                        if (chunks2.TryAdd(new Vect2(i, j), new ChunkV2(i, j, gpu)))
+                            queueToConstructVertex.Enqueue(new Vect2(i, j));
                     }
-                }
 
-                //Thread.Sleep(1000);
-
-
-                /*for (int i = plr.X - viewLength; i <= plr.X + viewLength; i++)
-                {
-                    for (int j = plr.Y - viewLength; j <= plr.Y + viewLength; j++)
+                    for (int i = plr.X - r; i <= plr.X + r; i++)
                     {
-
-                        if (chunks.ContainsKey(new Vect2(i, j)))
-                        {
-                            try
-                            {
-                                
-                                //for (int h = 0; h < 4; h++)
-                                //if (tasknum <= MAX_TASK)
-                                    if (chunks[new Vect2(i, j)].loaded[1] == 0)
-                                    {
-                                        chunks[new Vect2(i, j)].loaded[1] = 1;
-                                        //Thread.Sleep(20);
-                                        GenerateChunkVertexTask(new Vect2(i, j), 0, gpu);
-                                    }
-
-                            }
-                            catch (ArgumentException e) {
-                                Console.WriteLine(e);
-                            }
-
-                        }
-
-                        ChunkV2 c;
-                        if(chunks2.TryGetValue(new Vect2(i, j), out c))
-                        {
-                            if (!c.isVertexBuilded)
-                            {
-                                c.BuildVertex();
-                                queue2.Add(new Vect2(i, j));
-                            }
-                        }
-
+                        int j = plr.Y - r;
+                        if (chunks2.TryAdd(new Vect2(i, j), new ChunkV2(i, j, gpu)))
+                            queueToConstructVertex.Enqueue(new Vect2(i, j));
                     }
-                }*/
 
 
-                Thread.Sleep(16); // 1000
-
-
-            }
-
-        }
-
-        public static void VertexBuilderTask()
-        {
-
-            Vect2 plr = new Vect2();
-
-            while (true)
-            {
-
-                plr.X = (int)Main.cameraV2.Position.X / 16;
-                plr.Y = (int)Main.cameraV2.Position.Z / 16;
-
-                for (int i = plr.X - viewLength; i <= plr.X + viewLength; i++)
-                {
-                    for (int j = plr.Y - viewLength; j <= plr.Y + viewLength; j++)
+                    for (int j = plr.Y - r + 1; j <= plr.Y + r - 1; j++)
                     {
-
-
-                        bool existAdjacent = chunks2.TryGetValue(new Vect2(i - 1, j), out _) &&
-                                        chunks2.TryGetValue(new Vect2(i + 1, j), out _) &&
-                                        chunks2.TryGetValue(new Vect2(i, j - 1), out _) &&
-                                        chunks2.TryGetValue(new Vect2(i, j + 1), out _);
-
-                        
-                        if (existAdjacent && chunks2.TryGetValue(new Vect2(i, j), out ChunkV2 c))
-                        {
-
-                            int localI = i;
-                            int localJ = j;
-
-                            //Task.Run(() =>
-                            //{
-
-                                if (!c.isVertexBuilded)
-                                {
-                                    c.BuildVertex();
-                                    queue2.Add(new Vect2(localI, localJ));
-                                    Console.WriteLine("CHUNK " + localI + " : " + localJ + " Vertex Created !");
-                                }
-
-                            //});
-
-                            
-                        }
-
+                        int i = plr.X + r;
+                        if (chunks2.TryAdd(new Vect2(i, j), new ChunkV2(i, j, gpu)))
+                            queueToConstructVertex.Enqueue(new Vect2(i, j));
                     }
+
+                    for (int j = plr.Y - r + 1; j <= plr.Y + r - 1; j++)
+                    {
+                        int i = plr.X - r;
+                        if (chunks2.TryAdd(new Vect2(i, j), new ChunkV2(i, j, gpu)))
+                            queueToConstructVertex.Enqueue(new Vect2(i, j));
+                    }
+
                 }
 
                 Thread.Sleep(16);
@@ -264,6 +160,78 @@ namespace DiscCraft_2
             }
 
         }
+
+
+        public static void VertexBuilderTask()
+        {
+
+            Vect2 plr = new Vect2();
+            int iteration = 0;
+            List<Vect2> fails = new List<Vect2>();
+
+            while (true)
+            {
+
+                plr.X = (int)Main.cameraV2.Position.X / 16;
+                plr.Y = (int)Main.cameraV2.Position.Z / 16;
+                iteration = 0;
+                fails.Clear();
+
+
+                while (queueToConstructVertex.TryDequeue(out Vect2 v))
+                {
+                    int i = v.X;
+                    int j = v.Y;
+
+                    bool existAdjacent = chunks2.TryGetValue(new Vect2(i - 1, j), out _) &&
+                                        chunks2.TryGetValue(new Vect2(i + 1, j), out _) &&
+                                        chunks2.TryGetValue(new Vect2(i, j - 1), out _) &&
+                                        chunks2.TryGetValue(new Vect2(i, j + 1), out _);
+
+                    if (!existAdjacent && chunks2.TryGetValue(v, out _))
+                        fails.Add(v);
+
+                    if (existAdjacent && chunks2.TryGetValue(new Vect2(i, j), out ChunkV2 c))
+                    {
+
+                        if (taskNum < 10)
+                        {
+                            taskNum += 1;
+                            Task.Run(() => ProcessChunkVertex(i, j, c));
+                        }
+                        else
+                            fails.Add(v);
+
+                    }
+
+                    iteration += 1;
+
+                }
+
+                foreach (var f in fails)
+                {
+                    queueToConstructVertex.Enqueue(f);
+                }
+
+                Thread.Sleep(16);
+
+            }
+
+        }
+
+        public static void ProcessChunkVertex(int i, int j, ChunkV2 c)
+        {
+
+            if (!c.isVertexBuilded)
+            {
+                Console.WriteLine("CHUNK " + i + " : " + j + " Vertex Started !");
+                c.BuildVertex();
+                queueToBuffer.Enqueue(new Vect2(i, j));
+            }
+            
+            taskNum -= 1;
+        }
+
 
         public static void UnloadChunkTask()
         {
@@ -374,8 +342,6 @@ namespace DiscCraft_2
 
             return new Vector3(X, blockCoord.Y, Z);
         }
-
-
 
     }
 

@@ -126,7 +126,7 @@ namespace Discraft
                 );
 
 
-                if (!camera.IsChunkVisible(subChunkBounds) ) //|| Vector3.DistanceSquared(subChunkWorldPos, Main.cameraV2.Position) > (16 * Handler.viewLength) * (16 * Handler.viewLength))
+                if (!camera.IsChunkVisible(subChunkBounds) ) // || Vector3.DistanceSquared(subChunkWorldPos, Main.cameraV2.Position) > (16 * Handler.viewLength) * (16 * Handler.viewLength))
                     continue;
 
                 if(!subChunks[(short)i].disposedValue)
